@@ -1,8 +1,7 @@
-from databases import Database
-from sqlalchemy import create_engine, MetaData
-from sqlalchemy.ext.asyncio import create_async_engine
 from core.config import DATABASE_URL
-
+from databases import Database
+from sqlalchemy import MetaData, create_engine
+from sqlalchemy.ext.asyncio import create_async_engine
 
 database = Database(DATABASE_URL)
 metadata = MetaData()
