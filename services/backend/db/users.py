@@ -16,5 +16,4 @@ user = Table(
     Column("updated_at", DateTime, nullable=False, onupdate=dt.utcnow()),
     Column("bio", String, nullable=True),
     Column("image", String, nullable=True),
-    Column("bio", String),
 )
