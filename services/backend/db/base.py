@@ -5,5 +5,5 @@ from sqlalchemy.ext.asyncio import create_async_engine
 
 database = Database(DATABASE_URL)
 metadata = MetaData()
-# engine = create_engine(DATABASE_URL, echo=True)
-engine = create_async_engine(DATABASE_URL, echo=True, future=True)
+engine = create_engine(DATABASE_URL, echo=True)
+async_engine = create_async_engine(DATABASE_URL, echo=True, future=True)
