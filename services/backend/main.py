@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from uvicorn import run
 
-from db.base import database
+# from db.base import database
 
 
 app = FastAPI()
