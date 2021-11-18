@@ -5,7 +5,7 @@ from sqlalchemy import Table, Column, Integer, String, DateTime
 from db.base import metadata
 
 
-user = Table(
+users = Table(
     "users",
     metadata,
     Column("id", Integer, primary_key=True, unique=True, autoincrement=True, nullable=False),
