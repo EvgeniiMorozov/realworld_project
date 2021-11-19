@@ -9,3 +9,6 @@ class User(TimestampMixin, BaseModel):
     password = CharField(max_length=128, null=True)
     bio = CharField(max_length=300, null=True)
     image = CharField(max_length=120, null=True)
+
+    class Meta:
+        table = "user"
