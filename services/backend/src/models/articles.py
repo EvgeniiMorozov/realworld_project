@@ -3,7 +3,7 @@ from typing import List, Optional
 
 from pydantic import BaseModel
 
-from models.user import ProfileUser
+from models.users import ProfileUser
 
 
 class Article(BaseModel):
