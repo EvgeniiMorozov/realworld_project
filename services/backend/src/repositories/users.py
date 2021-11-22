@@ -1,5 +1,6 @@
 from fastapi import HTTPException
 from fastapi.params import Depends
+from pydantic import EmailStr
 from sqlalchemy import delete, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from db.base import get_session
@@ -26,25 +27,42 @@ class UserRepository:
         db.refresh(db_user)
         return db_user
 
-    def change_user(self, db: AsyncSession, user: UserResponce, data: UserResponce) -> User:
+    def change_user(
+        self, db: AsyncSession, user: UserResponce, data: UserResponce
+    ) -> User:
         """Update and return User model."""
-        upd_user = update(User).where(User.token == user.user.token).values(**data.user.dict(exclude_unset=True))
+        upd_user = (
+            update(User)
+            .where(User.token == user.user.token)
+            .values(**data.user.dict(exclude_unset=True))
+        )
         # upd_user = update(User).where(User.token == user.token).values(**data.user.dict(exclude_unset=True))
         db.execute(upd_user)
         db.commit()
         return db.query(User).filter(User.token == user.user.token).first()
 
-    def get_current_user_by_token(self):
-        pass
+    def get_current_user_by_token(
+        self,
+        db: AsyncSession = Depends(get_session),
+        token: str = Depends(auth.check_token),
+    ) -> User:
+        """Getting a User model from a token and checking that the user exists."""
+        user = self.get_user_by_token(db, token)
+        if not user:
+            raise HTTPException(HTTP_401_UNAUTHORIZED, detail="Not authorized")
+        return self.get_user_by_token(db, token)
 
-    def get_user_by_token(self):
-        pass
+    def get_user_by_token(self, db: AsyncSession, token: str) -> User:
+        """Get User model by token."""
+        return db.query(User).filter(User.token == token).first()
 
-    def get_user_by_username(self):
-        pass
+    def get_user_by_username(self, db: AsyncSession, username: str) -> User:
+        """Get User model by username."""
+        return db.query(User).filter(User.username == username).first()
 
-    def get_user_by_email(self):
-        pass
+    def get_user_by_email(self, db: AsyncSession, email: EmailStr) -> User:
+        """Get User model by email."""
+        return db.query(User).filter(User.email == email).first()
 
     def create_subscribe(self):
         pass
@@ -53,5 +71,7 @@ class UserRepository:
         pass
 
     def check_subscribe(self, db: AsyncSession, follower: str, following: str) -> bool:
-        check = db.query(Follow).filter(Follow.user == follower, Follow.author == following)
+        check = db.query(Follow).filter(
+            Follow.user == follower, Follow.author == following
+        )
         return db.query(check.exists()).scalar()
