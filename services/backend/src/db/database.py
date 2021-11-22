@@ -1,4 +1,5 @@
-from sqlalchemy import Column, ForeignKey
+from sqlalchemy import Column
+from sqlalchemy import ForeignKey
 
 
 def reference_column(tablename, nullable=False, pk_name="id", **kwargs):

@@ -1,6 +1,7 @@
-from sqlalchemy import Column, String, Integer
-
 from db.base import Base
+from sqlalchemy import Column
+from sqlalchemy import Integer
+from sqlalchemy import String
 
 
 class Tag(Base):

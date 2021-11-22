@@ -1,9 +1,10 @@
 from core.config import DATABASE_URL
 # from databases import Database
 # from sqlalchemy import MetaData, create_engine
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
-from sqlalchemy.orm import declarative_base, sessionmaker
-
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.ext.asyncio import create_async_engine
+from sqlalchemy.orm import declarative_base
+from sqlalchemy.orm import sessionmaker
 
 # database = Database(DATABASE_URL)
 # metadata = MetaData()

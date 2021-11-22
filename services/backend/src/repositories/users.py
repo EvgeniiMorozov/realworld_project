@@ -1,14 +1,16 @@
+from core import auth
+from db.base import get_session
+from db.users import Follow
+from db.users import User
 from fastapi import HTTPException
 from fastapi.params import Depends
+from models.users import NewUserRequest
+from models.users import UserResponce
 from pydantic import EmailStr
-from sqlalchemy import delete, update
+from sqlalchemy import delete
+from sqlalchemy import update
 from sqlalchemy.ext.asyncio import AsyncSession
-from db.base import get_session
-from db.users import User, Follow
 from starlette.status import HTTP_401_UNAUTHORIZED
-
-from models.users import NewUserRequest, UserResponce
-from core import auth
 
 
 class UserRepository:

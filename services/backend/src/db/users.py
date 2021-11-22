@@ -1,9 +1,13 @@
 from datetime import datetime as dt
 
-from sqlalchemy import Column, String, Integer, DateTime, ForeignKey
-from sqlalchemy.orm import relationship, backref
-
 from db.base import Base
+from sqlalchemy import Column
+from sqlalchemy import DateTime
+from sqlalchemy import ForeignKey
+from sqlalchemy import Integer
+from sqlalchemy import String
+from sqlalchemy.orm import backref
+from sqlalchemy.orm import relationship
 
 
 class User(Base):
