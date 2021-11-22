@@ -12,6 +12,7 @@ psycopg2-binary = "*"
 bcrypt = "*"
 python-jose = "*"
 pyjwt = "*"
+python-slugify = "*"
 
 [dev-packages]
 mypy = "*"
