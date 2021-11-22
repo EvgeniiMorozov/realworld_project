@@ -5,6 +5,7 @@ from pydantic import BaseModel, EmailStr, HttpUrl
 
 class LoginUser(BaseModel):
     email: EmailStr
+    password: str
 
 
 class NewUser(LoginUser):
