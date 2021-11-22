@@ -27,24 +27,16 @@ class UserRepository:
         db.refresh(db_user)
         return db_user
 
-    def change_user(
-        self, db: AsyncSession, user: UserResponce, data: UserResponce
-    ) -> User:
+    def change_user(self, db: AsyncSession, user: UserResponce, data: UserResponce) -> User:
         """Update and return User model."""
-        upd_user = (
-            update(User)
-            .where(User.token == user.user.token)
-            .values(**data.user.dict(exclude_unset=True))
-        )
+        upd_user = update(User).where(User.token == user.user.token).values(**data.user.dict(exclude_unset=True))
         # upd_user = update(User).where(User.token == user.token).values(**data.user.dict(exclude_unset=True))
         db.execute(upd_user)
         db.commit()
         return db.query(User).filter(User.token == user.user.token).first()
 
     def get_current_user_by_token(
-        self,
-        db: AsyncSession = Depends(get_session),
-        token: str = Depends(auth.check_token),
+        self, db: AsyncSession = Depends(get_session), token: str = Depends(auth.check_token)
     ) -> User:
         """Getting a User model from a token and checking that the user exists."""
         user = self.get_user_by_token(db, token)
@@ -64,26 +56,18 @@ class UserRepository:
         """Get User model by email."""
         return db.query(User).filter(User.email == email).first()
 
-    def create_subscribe(
-        self, db: AsyncSession, user_username: str, author_username: str
-    ) -> None:
+    def create_subscribe(self, db: AsyncSession, user_username: str, author_username: str) -> None:
         """Create Follow model by user and author username."""
         db_subscribe = Follow(user=user_username, author=author_username)
         db.add(db_subscribe)
         db.commit()
 
-    def delete_subscribe(
-        self, db: AsyncSession, user_username: str, author_username: str
-    ) -> None:
+    def delete_subscribe(self, db: AsyncSession, user_username: str, author_username: str) -> None:
         """Delete Follow model by user and author username."""
-        subscribe = delete(Follow).where(
-            Follow.user == user_username, Follow.author == author_username
-        )
+        subscribe = delete(Follow).where(Follow.user == user_username, Follow.author == author_username)
         db.execute(subscribe)
         db.commit()
 
     def check_subscribe(self, db: AsyncSession, follower: str, following: str) -> bool:
-        check = db.query(Follow).filter(
-            Follow.user == follower, Follow.author == following
-        )
+        check = db.query(Follow).filter(Follow.user == follower, Follow.author == following)
         return db.query(check.exists()).scalar()
