@@ -75,12 +75,7 @@ class ArticleRepository:
         """Creating an article, based on data from a pydantic query model."""
         tags = []
         if data.article.tagList:
-            tags = [
-                tag_name
-                for tag_name in db.query(Tag)
-                .filter(Tag.name.in_(data.article.tagList))
-                .all()
-            ]
+            tags = [tag_name for tag_name in db.query(Tag).filter(Tag.name.in_(data.article.tagList)).all()]
 
         db_article = Article(
             slug=slugify(data.article.title),
@@ -100,7 +95,9 @@ class ArticleRepository:
         db_article.updatedAt = db_article.updated_at
         return db_article
 
-    def get_single_article_auth_or_not_auth(self, db: AsyncSession, slug: str, current_user: Optional[User] = None) -> Article or None:
+    def get_single_article_auth_or_not_auth(
+        self, db: AsyncSession, slug: str, current_user: Optional[User] = None
+    ) -> Article or None:
         """Get single Article or None on slug. Auth is optional."""
         articles = db.query(Article).where(Article.slug == slug).all()
 
