@@ -190,5 +190,4 @@ class ArticleRepository:
     def select_tags(self, db: AsyncSession) -> list[str]:
         """Get all tags."""
         db_tags = db.query(Tag).all()
-        tags = [tag.name for tag in db_tags]
-        return tags
+        return [tag.name for tag in db_tags]
