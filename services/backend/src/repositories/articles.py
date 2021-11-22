@@ -7,7 +7,7 @@ from sqlalchemy.orm import contains_eager
 from sqlalchemy.sql.expression import or_
 
 from core import utils
-from models.articles import CreateArticleRequest
+from models.articles import CreateArticleRequest, UpdateArticle
 from db.articles import Article, Favorite
 from db.comments import Comment
 from db.tags import Tag
@@ -16,6 +16,9 @@ from repositories.users import UserRepository
 
 
 class ArticleRepository:
+    def __init__(self):
+        self.user = UserRepository()
+
     def get_articles_auth_or_not(
         self,
         db: AsyncSession,
@@ -96,3 +99,34 @@ class ArticleRepository:
         db_article.createdAt = db_article.created_at
         db_article.updatedAt = db_article.updated_at
         return db_article
+
+    def get_single_article_auth_or_not_auth(self, db: AsyncSession, slug: str, current_user: Optional[User] = None) -> Article or None:
+        """Get single Article or None on slug. Auth is optional."""
+        articles = db.query(Article).where(Article.slug == slug).all()
+
+        if not articles:
+            return None
+
+        articles = utils.add_tags_authors_favorites_time_in_articles(db, articles)
+        if current_user:
+            articles = utils.add_favorited(db, articles, current_user)
+            for article in articles:
+                subscribe = self.user.check_subscribe(db, current_user.username, article.author.username)
+                if subscribe:
+                    article.author.following = True
+        db.close()
+        return articles[0]
+
+    def change_article(self, db: AsyncSession, slug: str, article_data: UpdateArticle, user: User) -> Article:
+        """Edit Article by slug."""
+        upd_article = (
+            update(Article)
+            .where(Article.slug == slug)
+            .values(author=user.username, **article_data.article.dict(exclude_unset=True))
+            .execution_options(synchronize_session="fetch")
+        )
+        db.execute(upd_article)
+        db.commit()
+        db.close()
+
+        return self.get_single_article_auth_or_not_auth(db, slug)
