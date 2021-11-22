@@ -64,11 +64,23 @@ class UserRepository:
         """Get User model by email."""
         return db.query(User).filter(User.email == email).first()
 
-    def create_subscribe(self):
-        pass
+    def create_subscribe(
+        self, db: AsyncSession, user_username: str, author_username: str
+    ) -> None:
+        """Create Follow model by user and author username."""
+        db_subscribe = Follow(user=user_username, author=author_username)
+        db.add(db_subscribe)
+        db.commit()
 
-    def delete_subscribe(self):
-        pass
+    def delete_subscribe(
+        self, db: AsyncSession, user_username: str, author_username: str
+    ) -> None:
+        """Delete Follow model by user and author username."""
+        subscribe = delete(Follow).where(
+            Follow.user == user_username, Follow.author == author_username
+        )
+        db.execute(subscribe)
+        db.commit()
 
     def check_subscribe(self, db: AsyncSession, follower: str, following: str) -> bool:
         check = db.query(Follow).filter(
