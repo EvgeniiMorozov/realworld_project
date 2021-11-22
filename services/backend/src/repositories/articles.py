@@ -1,18 +1,23 @@
 from typing import Optional
 
+from core import utils
+from db.articles import Article
+from db.articles import Favorite
+from db.comments import Comment
+from db.tags import Tag
+from db.users import Follow
+from db.users import User
+from models.articles import CreateArticleRequest
+from models.articles import CreateComment
+from models.articles import UpdateArticle
+from repositories.users import UserRepository
 from slugify import slugify
-from sqlalchemy import delete, update, desc
+from sqlalchemy import delete
+from sqlalchemy import desc
+from sqlalchemy import update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import contains_eager
 from sqlalchemy.sql.expression import or_
-
-from core import utils
-from models.articles import CreateArticleRequest, UpdateArticle
-from db.articles import Article, Favorite
-from db.comments import Comment
-from db.tags import Tag
-from db.users import User, Follow
-from repositories.users import UserRepository
 
 
 class ArticleRepository:
@@ -127,3 +132,63 @@ class ArticleRepository:
         db.close()
 
         return self.get_single_article_auth_or_not_auth(db, slug)
+
+    def delete_article(self, db: AsyncSession, slug: str) -> None:
+        """Delete Article by slug."""
+        del_article = delete(Article).where(Article.slug == slug).execution_options(synchronize_session="fetch")
+        db.execute(del_article)
+        db.commit()
+
+    def get_comments(self, db: AsyncSession, slug: str, auth_user: Optional[User] = None) -> list[Comment]:
+        """Get article comments on slug. Auth is optional."""
+        comments = db.query(Comment).where(Comment.article == slug).all()
+        for comment in comments:
+            comment.author = db.query(User).where(User.id == comment.author).first()
+            if auth_user:
+                comment.author = utils.add_following(db, comment.author, auth_user)
+            comment.createdAt = comment.created_at
+            comment.updatedAt = comment.updated_at
+        return comments
+
+    def create_comment(self, db: AsyncSession, data: CreateComment, slug: str, user: User) -> Comment:
+        """Create a comment for an article by slug and user."""
+        db_comment = Comment(body=data.comment.body, author=user.id, article=slug)
+        db.add(db_comment)
+        db.commit()
+        db.refresh(db_comment)
+        db_comment.author = user
+        db_comment.createdAt = db_comment.created_at
+        db_comment.updatedAt = db_comment.updated_at
+        return db_comment
+
+    def delete_comment(self, db: AsyncSession, slug: str, comment_id: str, user: User) -> None:
+        """Delete the comment on slug and author of the article."""
+        del_comment = (
+            delete(Comment)
+            .where(Comment.article == slug, Comment.id == comment_id)
+            .execution_options(synchronize_options="fetch")
+        )
+        db.execute(del_comment)
+        db.commit()
+
+    def get_comment(self, db: AsyncSession, slug: str, comment_id: str) -> Comment:
+        """Get single comment for an article by slug and comment id"""
+        return db.query(Comment).where(Comment.article == slug, Comment.id == comment_id).first()
+
+    def create_favorite(self, db: AsyncSession, slug: str, user: User):
+        """Create Favorite model by article slug."""
+        favorite = Favorite(article=slug, user=user.username)
+        db.add(favorite)
+        db.commit()
+
+    def delete_favorite(self, db: AsyncSession, slug: str, user: User) -> None:
+        """Delete Favorite model by article slug and user."""
+        del_favorite = delete(Favorite).where(Favorite.article == slug, Favorite.user == user.username)
+        db.execute(del_favorite)
+        db.commit()
+
+    def select_tags(self, db: AsyncSession) -> list[str]:
+        """Get all tags."""
+        db_tags = db.query(Tag).all()
+        tags = [tag.name for tag in db_tags]
+        return tags
