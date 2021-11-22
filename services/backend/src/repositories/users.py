@@ -69,5 +69,6 @@ class UserRepository:
         db.commit()
 
     def check_subscribe(self, db: AsyncSession, follower: str, following: str) -> bool:
+        """Checking Follow model by user and author username."""
         check = db.query(Follow).filter(Follow.user == follower, Follow.author == following)
         return db.query(check.exists()).scalar()
