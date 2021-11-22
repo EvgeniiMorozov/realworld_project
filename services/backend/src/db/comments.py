@@ -1,12 +1,13 @@
 from datetime import datetime as dt
 
-from db.base import Base
 from sqlalchemy import Column
 from sqlalchemy import DateTime
 from sqlalchemy import ForeignKey
 from sqlalchemy import Integer
 from sqlalchemy import String
 from sqlalchemy import Text
+
+from db.base import Base
 
 
 class Comment(Base):

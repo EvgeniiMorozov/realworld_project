@@ -1,9 +1,10 @@
+from sqlalchemy import func
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from db.articles import Article
 from db.articles import Favorite
 from db.users import User
 from repositories.users import UserRepository
-from sqlalchemy import func
-from sqlalchemy.ext.asyncio import AsyncSession
 
 
 def add_following(db: AsyncSession, user: User, follower: User) -> User:

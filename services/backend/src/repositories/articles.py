@@ -1,5 +1,13 @@
 from typing import Optional
 
+from slugify import slugify
+from sqlalchemy import delete
+from sqlalchemy import desc
+from sqlalchemy import update
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import contains_eager
+from sqlalchemy.sql.expression import or_
+
 from core import utils
 from db.articles import Article
 from db.articles import Favorite
@@ -11,13 +19,6 @@ from models.articles import CreateArticleRequest
 from models.articles import CreateComment
 from models.articles import UpdateArticle
 from repositories.users import UserRepository
-from slugify import slugify
-from sqlalchemy import delete
-from sqlalchemy import desc
-from sqlalchemy import update
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import contains_eager
-from sqlalchemy.sql.expression import or_
 
 
 class ArticleRepository:

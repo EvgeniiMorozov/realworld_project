@@ -1,11 +1,12 @@
 from os import getenv
 
-from core.consts import token_description
+import jwt
 from fastapi import Security
 from fastapi.exceptions import HTTPException
 from fastapi.security.api_key import APIKeyHeader
-import jwt
 from starlette.status import HTTP_401_UNAUTHORIZED
+
+from core.consts import token_description
 
 SECRET = getenv("RW_AUTH_SECRET")
 ALGORITHM = getenv("RW_AUTH_ALGORITHM")

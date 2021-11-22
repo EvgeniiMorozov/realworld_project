@@ -1,6 +1,5 @@
 from datetime import datetime as dt
 
-from db.base import Base
 from sqlalchemy import Column
 from sqlalchemy import DateTime
 from sqlalchemy import ForeignKey
@@ -8,8 +7,8 @@ from sqlalchemy import Integer
 from sqlalchemy import String
 from sqlalchemy import Table
 from sqlalchemy import Text
-from sqlalchemy.orm import backref
-from sqlalchemy.orm import relationship
+
+from db.base import Base
 
 
 class Article(Base):
