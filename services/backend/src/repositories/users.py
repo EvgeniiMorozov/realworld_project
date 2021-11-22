@@ -6,12 +6,13 @@ from db.base import get_session
 from db.users import User, Follow
 from starlette.status import HTTP_401_UNAUTHORIZED
 
-from models.users import NewUserRequest
+from models.users import NewUserRequest, UserResponce
 from core import auth
 
 
 class UserRepository:
     def create_user(self, db: AsyncSession, user: NewUserRequest):
+        """Create and return a created User model."""
         db_user = User(
             token=auth.encode_jwt(user.user.email, user.user.password),
             username=user.user.username,
@@ -25,8 +26,13 @@ class UserRepository:
         db.refresh(db_user)
         return db_user
 
-    def change_user(self):
-        pass
+    def change_user(self, db: AsyncSession, user: UserResponce, data: UserResponce) -> User:
+        """Update and return User model."""
+        upd_user = update(User).where(User.token == user.user.token).values(**data.user.dict(exclude_unset=True))
+        # upd_user = update(User).where(User.token == user.token).values(**data.user.dict(exclude_unset=True))
+        db.execute(upd_user)
+        db.commit()
+        return db.query(User).filter(User.token == user.user.token).first()
 
     def get_current_user_by_token(self):
         pass
