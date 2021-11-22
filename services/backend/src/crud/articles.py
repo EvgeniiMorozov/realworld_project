@@ -22,7 +22,6 @@ from models.articles import UpdateArticle
 
 
 def get_articles_auth_or_not(
-    self,
     db: AsyncSession,
     tag: Optional[str] = None,
     author: Optional[str] = None,
