@@ -2,8 +2,6 @@ from fastapi import HTTPException, APIRouter, Request
 from fastapi.params import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.status import (
-    HTTP_200_OK,
-    HTTP_201_CREATED,
     HTTP_400_BAD_REQUEST,
     HTTP_403_FORBIDDEN,
     HTTP_404_NOT_FOUND,
@@ -12,8 +10,8 @@ from starlette.status import (
 
 from core.auth import encode_jwt, clear_token
 from core.utils import add_following
-from db.base import get_session
 from crud import users as users_crud
+from db.base import get_session
 from db.users import User
 from models.users import UserResponce, LoginUserRequest, NewUserRequest, UpdateUserRequest, ProfileUserResponce
 
@@ -51,9 +49,9 @@ async def current_user(user: User = Depends(users_crud.get_current_user_by_token
 
 @users_router.put("/user", response_model=UpdateUserRequest, tags=["User and Authentication"])
 async def update_user(
-    data: UpdateUserRequest,
-    db: AsyncSession = Depends(get_session),
-    user: User = Depends(users_crud.get_current_user_by_token),
+        data: UpdateUserRequest,
+        db: AsyncSession = Depends(get_session),
+        user: User = Depends(users_crud.get_current_user_by_token),
 ) -> UpdateUserRequest:
     """Update user information for current user."""
     if user:
@@ -79,9 +77,9 @@ async def get_profile(request: Request, username: str, db: AsyncSession = Depend
 
 @users_router.post("/profiles/{username}/follow", response_model=ProfileUserResponce, tags=["Profile"])
 async def create_follow(
-    username: str,
-    db: AsyncSession = Depends(get_session),
-    follower: User = Depends(users_crud.get_current_user_by_token),
+        username: str,
+        db: AsyncSession = Depends(get_session),
+        follower: User = Depends(users_crud.get_current_user_by_token),
 ) -> ProfileUserResponce:
     """Follow a user by username."""
     following = await users_crud.get_user_by_username(db, username)
@@ -101,9 +99,9 @@ async def create_follow(
 
 @users_router.delete("/profiles/{username}/follow", response_model=ProfileUserResponce, tags=["Profile"])
 async def delete_follow(
-    username: str,
-    db: AsyncSession = Depends(get_session),
-    follower: User = Depends(users_crud.get_current_user_by_token),
+        username: str,
+        db: AsyncSession = Depends(get_session),
+        follower: User = Depends(users_crud.get_current_user_by_token),
 ) -> ProfileUserResponce:
     """Unfollow a user by username."""
     following = await users_crud.get_user_by_username(db, username)
