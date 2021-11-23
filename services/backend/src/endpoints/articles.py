@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.status import HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND, HTTP_200_OK
 
 from core import auth
+from core import utils
 from crud import articles as articles_crud
 from crud import users as users_crud
 from db.base import get_session
@@ -192,3 +193,24 @@ async def remove_comment(
 
     articles_crud.delete_comment(db, slug, comment_id, user)
     return Response(status_code=HTTP_200_OK)
+
+
+@articles_router.post("/articles/{slug}/favorite", response_model=CreateArticleResponce, tags=["Favorite"])
+async def post_favorite(
+    slug: str,
+    db: AsyncSession = Depends(get_session),
+    user: User = Depends(users_crud.get_current_user_by_token),
+) -> CreateArticleResponce:
+    """Favorite an article. Auth is required."""
+    article = await articles_crud.get_single_article_auth_or_not_auth(db, slug, user)
+    if not article:
+        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=f"Article with slug: '{slug}' not found")
+
+    favorite = utils.check_favorite(db, slug, user.username)
+    if favorite:
+        raise HTTPException(
+            status_code=HTTP_400_BAD_REQUEST, detail="You have already added this article to your favorites"
+        )
+    await articles_crud.create_favorite(db, slug, user)
+    article.favorited = True
+    return CreateArticleResponce(article=article)
