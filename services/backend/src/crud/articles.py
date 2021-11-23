@@ -174,7 +174,7 @@ def delete_comment(db: AsyncSession, slug: str, comment_id: str, user: User) -> 
     db.commit()
 
 
-def get_comment(db: AsyncSession, slug: str, comment_id: str) -> Comment:
+def get_comment(db: AsyncSession, slug: str, comment_id: int) -> Comment:
     """Get single comment for an article by slug and comment id"""
     return db.query(Comment).where(Comment.article == slug, Comment.id == comment_id).first()
 
