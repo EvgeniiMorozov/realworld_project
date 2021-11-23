@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 
 from fastapi import APIRouter, HTTPException, Request, Response
 from fastapi.params import Depends
@@ -11,7 +11,14 @@ from crud import articles as articles_crud
 from crud import users as users_crud
 from db.base import get_session
 from db.users import User
-from models.articles import GetArticles, CreateArticleResponce, CreateArticleRequest, GetArticle, UpdateArticle
+from models.articles import (
+    GetArticles,
+    CreateArticleResponce,
+    CreateArticleRequest,
+    GetArticle,
+    UpdateArticle,
+    GetCommentsResponce,
+)
 
 articles_router = APIRouter()
 
@@ -125,3 +132,22 @@ async def remove_article(
         )
     articles_crud.delete_article(db, slug)
     return Response(status_code=HTTP_200_OK)
+
+
+@articles_router.get("/articles/{slug}/comments", response_model=GetCommentsResponce)
+async def select_comment(request: Request, slug: str, db: AsyncSession = Depends(get_session)) -> GetCommentsResponce:
+    """Get the comments for an article. Auth is optional."""
+    article = await articles_crud.get_single_article_auth_or_not_auth(db, slug)
+
+    if not article:
+        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=f"Article with slug: '{slug}' not found")
+
+    authorization = await request.headers.get("authorization")
+    if authorization:
+        token = auth.clear_token(authorization)
+        auth_user = await users_crud.get_current_user_by_token(db, token)
+        comments = articles_crud.get_comments(db, slug, auth_user)
+    else:
+        comments = articles_crud.get_comments(db, slug)
+
+    return GetCommentsResponce(comments=comments)
