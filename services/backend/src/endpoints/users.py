@@ -8,7 +8,7 @@ from core.auth import encode_jwt
 from db.base import get_session
 from crud import users as users_crud
 from db.users import User
-from models.users import UserResponce, LoginUserRequest
+from models.users import UserResponce, LoginUserRequest, NewUserRequest
 
 users_router = APIRouter()
 
@@ -21,6 +21,16 @@ async def authentication(user_login: LoginUserRequest, db: AsyncSession = Depend
     if user:
         return UserResponce(user=user)
     raise HTTPException(status_code=HTTP_401_UNAUTHORIZED, detail="Not authorized")
+
+
+@users_router.post("/users", response_model=UserResponce, status_code=201, tags=["User and Authentication"])
+async def register_user(new_user: NewUserRequest, db: AsyncSession = Depends(get_session)) -> UserResponce:
+    db_user = await users_crud.get_user_by_email(db, new_user.user.email)
+    if db_user:
+        raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail=f"Email {new_user.user.email} already registered")
+
+    user = await users_crud.create_user(db, new_user)
+    return UserResponce(user=user)
 
 
 
