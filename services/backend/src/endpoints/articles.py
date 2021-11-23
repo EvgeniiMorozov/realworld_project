@@ -18,6 +18,8 @@ from models.articles import (
     GetArticle,
     UpdateArticle,
     GetCommentsResponce,
+    CreateComment,
+    GetCommentResponce,
 )
 
 articles_router = APIRouter()
@@ -151,3 +153,19 @@ async def select_comment(request: Request, slug: str, db: AsyncSession = Depends
         comments = articles_crud.get_comments(db, slug)
 
     return GetCommentsResponce(comments=comments)
+
+
+@articles_router.post("/articles/{slug}/comments", response_model=GetCommentResponce, tags=["Comments"])
+async def post_comment(
+    slug: str,
+    comment: CreateComment,
+    db: AsyncSession = Depends(get_session),
+    user: User = Depends(users_crud.get_current_user_by_token),
+) -> GetCommentResponce:
+    """Create a comment for an article. Auth is required."""
+    article = await articles_crud.get_single_article_auth_or_not_auth(db, slug, user)
+    if not article:
+        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=f"Article with slug: '{slug}' not found")
+
+    comment = await articles_crud.create_comment(db, comment, slug, user)
+    return GetCommentResponce(comment=comment)
