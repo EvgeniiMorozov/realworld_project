@@ -10,8 +10,7 @@ from core import auth
 from db.base import get_session
 from db.users import Follow
 from db.users import User
-from models.users import NewUserRequest
-from models.users import UserResponce
+from models.users import NewUserRequest, UpdateUserRequest, UserResponce
 
 
 def create_user(db: AsyncSession, user: NewUserRequest):
@@ -30,7 +29,7 @@ def create_user(db: AsyncSession, user: NewUserRequest):
     return db_user
 
 
-def change_user(db: AsyncSession, user: UserResponce, data: UserResponce) -> User:
+def change_user(db: AsyncSession, user: UserResponce, data: UpdateUserRequest) -> User:
     """Update and return User model."""
     upd_user = update(User).where(User.token == user.user.token).values(**data.user.dict(exclude_unset=True))
     # upd_user = update(User).where(User.token == user.token).values(**data.user.dict(exclude_unset=True))
