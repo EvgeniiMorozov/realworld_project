@@ -1,10 +1,10 @@
 from typing import Optional
 
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, HTTPException, Request, Response
 from fastapi.params import Depends
 from slugify.slugify import slugify
 from sqlalchemy.ext.asyncio import AsyncSession
-from starlette.status import HTTP_201_CREATED, HTTP_400_BAD_REQUEST
+from starlette.status import HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND, HTTP_200_OK
 
 from core import auth
 from crud import articles as articles_crud
@@ -16,14 +16,12 @@ from models.articles import GetArticles, CreateArticleResponce, CreateArticleReq
 articles_router = APIRouter()
 
 
-@articles_router.get(
-    "/articles/feed", response_model=GetArticles, tags=["Articles"]
-)
+@articles_router.get("/articles/feed", response_model=GetArticles, tags=["Articles"])
 def get_recent_articles_from_users_you_follow(
-        limit: Optional[int] = 20,
-        offset: Optional[int] = 0,
-        db: AsyncSession = Depends(get_session),
-        user: User = Depends(users_crud.get_current_user_by_token),
+    limit: Optional[int] = 20,
+    offset: Optional[int] = 0,
+    db: AsyncSession = Depends(get_session),
+    user: User = Depends(users_crud.get_current_user_by_token),
 ):
     """
     Get most recent articles from users you follow.
@@ -35,13 +33,13 @@ def get_recent_articles_from_users_you_follow(
 
 @articles_router.get("/articles", response_model=GetArticles, tags=["Articles"])
 def get_articles(
-        request: Request,
-        tag: Optional[str] = None,
-        author: Optional[str] = None,
-        favorited: Optional[str] = None,
-        limit: Optional[int] = 20,
-        offset: Optional[int] = 0,
-        db: AsyncSession = Depends(get_session),
+    request: Request,
+    tag: Optional[str] = None,
+    author: Optional[str] = None,
+    favorited: Optional[str] = None,
+    limit: Optional[int] = 20,
+    offset: Optional[int] = 0,
+    db: AsyncSession = Depends(get_session),
 ):
     """
     Get most recent articles globally.
@@ -60,9 +58,9 @@ def get_articles(
 
 @articles_router.post("/articles", response_model=CreateArticleResponce, status_code=HTTP_201_CREATED)
 def set_up_article(
-        article_data: CreateArticleRequest,
-        db: AsyncSession,
-        user: User,
+    article_data: CreateArticleRequest,
+    db: AsyncSession,
+    user: User,
 ):
     """Create an article. Auth is required."""
     slug = slugify(article_data.article.title)
@@ -86,23 +84,44 @@ def get_article(request: Request, slug: str, db: AsyncSession = Depends(get_sess
         article = articles_crud.get_single_article_auth_or_not_auth(db, slug)
 
     if not article:
-        raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail="Article not found")
+        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=f"Article with slug '{slug}' not found")
 
     return GetArticle(article=article)
 
 
 @articles_router.put("/articles/{slug}", response_model=GetArticle, tags=["Articles"])
 async def change_article(
-        article_data: UpdateArticle,
-        slug: str,
-        db: AsyncSession = Depends(get_session),
-        user: User = Depends(users_crud.get_current_user_by_token)
+    article_data: UpdateArticle,
+    slug: str,
+    db: AsyncSession = Depends(get_session),
+    user: User = Depends(users_crud.get_current_user_by_token),
 ) -> GetArticle:
     """Update an article. Auth is required."""
     check = await articles_crud.get_single_article_auth_or_not_auth(db, slug)
 
     if check.author.username != user.username:
-        raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail="You are not the author of this article")
+        raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="You are not the author of this article")
 
     article = await articles_crud.change_article(db, slug, article_data, user)
     return GetArticle(article=article)
+
+
+@articles_router.delete("/articles/{slug}", response_description="OK", tags=["Articles"])
+async def remove_article(
+    slug: str,
+    db: AsyncSession = Depends(get_session),
+    user: User = Depends(users_crud.get_current_user_by_token),
+) -> Response:
+    """Delete an article.Auth is required."""
+    article = await articles_crud.get_single_article_auth_or_not_auth(db, slug)
+
+    if not article:
+        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=f"Article with slug: '{slug}' not found")
+
+    if article.author.username != user.username:
+        raise HTTPException(
+            status_code=HTTP_403_FORBIDDEN,
+            detail="You can`t delete this article. You are not the author of this article",
+        )
+    articles_crud.delete_article(db, slug)
+    return Response(status_code=HTTP_200_OK)
