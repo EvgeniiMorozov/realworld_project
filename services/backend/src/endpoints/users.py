@@ -25,6 +25,7 @@ async def authentication(user_login: LoginUserRequest, db: AsyncSession = Depend
 
 @users_router.post("/users", response_model=UserResponce, status_code=201, tags=["User and Authentication"])
 async def register_user(new_user: NewUserRequest, db: AsyncSession = Depends(get_session)) -> UserResponce:
+    """Register a new user."""
     db_user = await users_crud.get_user_by_email(db, new_user.user.email)
     if db_user:
         raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail=f"Email {new_user.user.email} already registered")
@@ -33,4 +34,9 @@ async def register_user(new_user: NewUserRequest, db: AsyncSession = Depends(get
     return UserResponce(user=user)
 
 
-
+@users_router.get("/user", response_model=UserResponce, tags=["User and Authentication"])
+async def current_user(user: User = Depends(users_crud.get_current_user_by_token)) -> UserResponce:
+    """Gets the currently logged-in user."""
+    if not user:
+        raise HTTPException(status_code=HTTP_401_UNAUTHORIZED, detail="Not authorized")
+    return UserResponce(user=user)
