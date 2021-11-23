@@ -10,11 +10,12 @@ from starlette.status import (
     HTTP_401_UNAUTHORIZED,
 )
 
-from core.auth import encode_jwt
+from core.auth import encode_jwt, clear_token
+from core.utils import add_following
 from db.base import get_session
 from crud import users as users_crud
 from db.users import User
-from models.users import UserResponce, LoginUserRequest, NewUserRequest, UpdateUserRequest
+from models.users import UserResponce, LoginUserRequest, NewUserRequest, UpdateUserRequest, ProfileUserResponce
 
 users_router = APIRouter()
 
@@ -59,3 +60,18 @@ async def update_user(
         new_user = await users_crud.change_user(db, user, data)
         return UpdateUserRequest(user=new_user)
     raise HTTPException(status_code=HTTP_401_UNAUTHORIZED, detail="Not authorized")
+
+
+@users_router.get("/profiles/{username}", response_model=ProfileUserResponce, tags=["User and Authentication"])
+async def get_profile(request: Request, username: str, db: AsyncSession = Depends(get_session)) -> ProfileUserResponce:
+    """Get profile of a user of the system. Auth is optional."""
+    profile_user = await users_crud.get_user_by_username(db, username)
+    if not profile_user:
+        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=f"User '{username}' not found")
+
+    authorization = request.headers.get("authorization")
+    if authorization:
+        token = clear_token(authorization)
+        curr_user = await users_crud.get_current_user_by_token(db, token)
+        profile_user = await add_following(db, profile_user, curr_user)
+    return ProfileUserResponce(profile=profile_user)
