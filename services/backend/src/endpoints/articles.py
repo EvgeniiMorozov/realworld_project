@@ -12,6 +12,7 @@ from crud import articles as articles_crud
 from crud import users as users_crud
 from db.base import get_session
 from db.users import User
+from endpoints.helpers import check_article_status_and_return_if_positive
 from models.articles import (
     GetArticles,
     CreateArticleResponce,
@@ -75,9 +76,7 @@ def set_up_article(
 ):
     """Create an article. Auth is required."""
     slug = slugify(article_data.article.title)
-    article = articles_crud.get_single_article_auth_or_not_auth(db, slug)
-    if article:
-        raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail="An article with this title already exists.")
+    article = await check_article_status_and_return_if_positive(db, slug, user)
 
     article = articles_crud.create_article(db, article_data, user)
     return CreateArticleResponce(article=article)
@@ -90,12 +89,9 @@ def get_article(request: Request, slug: str, db: AsyncSession = Depends(get_sess
     if authorization:
         token = auth.clear_token(authorization)
         auth_user = users_crud.get_current_user_by_token(db, token)
-        article = articles_crud.get_single_article_auth_or_not_auth(db, slug, auth_user)
+        article = await check_article_status_and_return_if_positive(db, slug, auth_user)
     else:
-        article = articles_crud.get_single_article_auth_or_not_auth(db, slug)
-
-    if not article:
-        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=f"Article with slug '{slug}' not found")
+        article = await check_article_status_and_return_if_positive(db, slug)
 
     return GetArticle(article=article)
 
@@ -124,10 +120,7 @@ async def remove_article(
     user: User = Depends(users_crud.get_current_user_by_token),
 ) -> Response:
     """Delete an article.Auth is required."""
-    article = await articles_crud.get_single_article_auth_or_not_auth(db, slug)
-
-    if not article:
-        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=f"Article with slug: '{slug}' not found")
+    article = await check_article_status_and_return_if_positive(db, slug, user)
 
     if article.author.username != user.username:
         raise HTTPException(
@@ -141,10 +134,7 @@ async def remove_article(
 @articles_router.get("/articles/{slug}/comments", response_model=GetCommentsResponce)
 async def select_comment(request: Request, slug: str, db: AsyncSession = Depends(get_session)) -> GetCommentsResponce:
     """Get the comments for an article. Auth is optional."""
-    article = await articles_crud.get_single_article_auth_or_not_auth(db, slug)
-
-    if not article:
-        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=f"Article with slug: '{slug}' not found")
+    await check_article_status_and_return_if_positive(db, slug)
 
     authorization = await request.headers.get("authorization")
     if authorization:
@@ -165,9 +155,7 @@ async def post_comment(
     user: User = Depends(users_crud.get_current_user_by_token),
 ) -> GetCommentResponce:
     """Create a comment for an article. Auth is required."""
-    article = await articles_crud.get_single_article_auth_or_not_auth(db, slug, user)
-    if not article:
-        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=f"Article with slug: '{slug}' not found")
+    await check_article_status_and_return_if_positive(db, slug, user)
 
     comment = await articles_crud.create_comment(db, comment, slug, user)
     return GetCommentResponce(comment=comment)
@@ -181,10 +169,8 @@ async def remove_comment(
     user: User = Depends(users_crud.get_current_user_by_token),
 ) -> Response:
     """Delete a comment for an article. Auth is required."""
-    article = await articles_crud.get_single_article_auth_or_not_auth(db, slug)
+    article = await check_article_status_and_return_if_positive(db, slug, user)
 
-    if not article:
-        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=f"Article with slug: '{slug}' not found")
     if article.author != user:
         raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="You can only delete your own article.")
 
@@ -203,9 +189,7 @@ async def post_favorite(
     user: User = Depends(users_crud.get_current_user_by_token),
 ) -> CreateArticleResponce:
     """Favorite an article. Auth is required."""
-    article = await articles_crud.get_single_article_auth_or_not_auth(db, slug, user)
-    if not article:
-        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=f"Article with slug: '{slug}' not found")
+    article = await check_article_status_and_return_if_positive(db, slug, user)
 
     favorite = utils.check_favorite(db, slug, user.username)
     if favorite:
@@ -225,7 +209,6 @@ async def remove_favorite(
 ) -> CreateArticleResponce:
     """Unfavorite an article. Auth is required."""
     article = await check_article_status_and_return_if_positive(db, slug, user)
-
     favorite = utils.check_favorite(db, slug, user.username)
     if not favorite:
         raise HTTPException(
@@ -234,13 +217,6 @@ async def remove_favorite(
 
     articles_crud.delete_favorite(db, slug, user)
     return CreateArticleResponce(article=article)
-
-
-async def check_article_status_and_return_if_positive(db, slug, user):
-    article = await articles_crud.get_single_article_auth_or_not_auth(db, slug, user)
-    if not article:
-        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=f"Article with slug: '{slug}' not found")
-    return article
 
 
 @articles_router.get("/tags", response_model=GetTags, tags=["default"])
