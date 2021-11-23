@@ -21,6 +21,7 @@ from models.articles import (
     GetCommentsResponce,
     CreateComment,
     GetCommentResponce,
+    GetTags,
 )
 
 articles_router = APIRouter()
@@ -217,7 +218,11 @@ async def post_favorite(
 
 
 @articles_router.delete("/articles/{slug}/favorite", response_model=CreateArticleResponce, tags=["Favorites"])
-async def remove_favorite(slug: str, db: AsyncSession = Depends(get_session), user: User = Depends(users_crud.get_current_user_by_token),) -> CreateArticleResponce:
+async def remove_favorite(
+    slug: str,
+    db: AsyncSession = Depends(get_session),
+    user: User = Depends(users_crud.get_current_user_by_token),
+) -> CreateArticleResponce:
     """Unfavorite an article. Auth is required."""
     article = await articles_crud.get_single_article_auth_or_not_auth(db, slug, user)
     if not article:
@@ -225,7 +230,16 @@ async def remove_favorite(slug: str, db: AsyncSession = Depends(get_session), us
 
     favorite = utils.check_favorite(db, slug, user.username)
     if not favorite:
-        raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail="You have already added this article to your favorites")
+        raise HTTPException(
+            status_code=HTTP_400_BAD_REQUEST, detail="You have already added this article to your favorites"
+        )
 
     articles_crud.delete_favorite(db, slug, user)
     return CreateArticleResponce(article=article)
+
+
+@articles_router.get("/tags", response_model=GetTags, tags=["default"])
+async def get_tags(db: AsyncSession = Depends(get_session)) -> GetTags:
+    """Get tags. Auth not required."""
+    tags = articles_crud.select_tags(db)
+    return GetTags(tags=tags)
