@@ -224,9 +224,7 @@ async def remove_favorite(
     user: User = Depends(users_crud.get_current_user_by_token),
 ) -> CreateArticleResponce:
     """Unfavorite an article. Auth is required."""
-    article = await articles_crud.get_single_article_auth_or_not_auth(db, slug, user)
-    if not article:
-        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=f"Article with slug: '{slug}' not found")
+    article = await check_article_status_and_return_if_positive(db, slug, user)
 
     favorite = utils.check_favorite(db, slug, user.username)
     if not favorite:
@@ -236,6 +234,13 @@ async def remove_favorite(
 
     articles_crud.delete_favorite(db, slug, user)
     return CreateArticleResponce(article=article)
+
+
+async def check_article_status_and_return_if_positive(db, slug, user):
+    article = await articles_crud.get_single_article_auth_or_not_auth(db, slug, user)
+    if not article:
+        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=f"Article with slug: '{slug}' not found")
+    return article
 
 
 @articles_router.get("/tags", response_model=GetTags, tags=["default"])
