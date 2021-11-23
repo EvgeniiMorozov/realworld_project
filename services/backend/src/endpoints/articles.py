@@ -195,7 +195,7 @@ async def remove_comment(
     return Response(status_code=HTTP_200_OK)
 
 
-@articles_router.post("/articles/{slug}/favorite", response_model=CreateArticleResponce, tags=["Favorite"])
+@articles_router.post("/articles/{slug}/favorite", response_model=CreateArticleResponce, tags=["Favorites"])
 async def post_favorite(
     slug: str,
     db: AsyncSession = Depends(get_session),
@@ -213,4 +213,19 @@ async def post_favorite(
         )
     await articles_crud.create_favorite(db, slug, user)
     article.favorited = True
+    return CreateArticleResponce(article=article)
+
+
+@articles_router.delete("/articles/{slug}/favorite", response_model=CreateArticleResponce, tags=["Favorites"])
+async def remove_favorite(slug: str, db: AsyncSession = Depends(get_session), user: User = Depends(users_crud.get_current_user_by_token),) -> CreateArticleResponce:
+    """Unfavorite an article. Auth is required."""
+    article = await articles_crud.get_single_article_auth_or_not_auth(db, slug, user)
+    if not article:
+        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=f"Article with slug: '{slug}' not found")
+
+    favorite = utils.check_favorite(db, slug, user.username)
+    if not favorite:
+        raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail="You have already added this article to your favorites")
+
+    articles_crud.delete_favorite(db, slug, user)
     return CreateArticleResponce(article=article)
