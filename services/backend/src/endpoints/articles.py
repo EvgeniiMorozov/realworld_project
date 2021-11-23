@@ -169,3 +169,26 @@ async def post_comment(
 
     comment = await articles_crud.create_comment(db, comment, slug, user)
     return GetCommentResponce(comment=comment)
+
+
+@articles_router.delete("/articles/{slug}/comments/{id}", response_description="OK", tags=["Comments"])
+async def remove_comment(
+    slug: str,
+    comment_id: int,
+    db: AsyncSession = Depends(get_session),
+    user: User = Depends(users_crud.get_current_user_by_token),
+) -> Response:
+    """Delete a comment for an article. Auth is required."""
+    article = await articles_crud.get_single_article_auth_or_not_auth(db, slug)
+
+    if not article:
+        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=f"Article with slug: '{slug}' not found")
+    if article.author != user:
+        raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="You can only delete your own article.")
+
+    comment = await articles_crud.get_comment(db, slug, comment_id)
+    if not comment:
+        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Comment not found")
+
+    articles_crud.delete_comment(db, slug, comment_id, user)
+    return Response(status_code=HTTP_200_OK)
