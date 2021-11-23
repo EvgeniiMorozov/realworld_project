@@ -11,7 +11,7 @@ from crud import articles as articles_crud
 from crud import users as users_crud
 from db.base import get_session
 from db.users import User
-from models.articles import GetArticles, CreateArticleResponce, CreateArticleRequest, GetArticle
+from models.articles import GetArticles, CreateArticleResponce, CreateArticleRequest, GetArticle, UpdateArticle
 
 articles_router = APIRouter()
 
@@ -88,4 +88,21 @@ def get_article(request: Request, slug: str, db: AsyncSession = Depends(get_sess
     if not article:
         raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail="Article not found")
 
+    return GetArticle(article=article)
+
+
+@articles_router.put("/articles/{slug}", response_model=GetArticle, tags=["Articles"])
+async def change_article(
+        article_data: UpdateArticle,
+        slug: str,
+        db: AsyncSession = Depends(get_session),
+        user: User = Depends(users_crud.get_current_user_by_token)
+) -> GetArticle:
+    """Update an article. Auth is required."""
+    check = await articles_crud.get_single_article_auth_or_not_auth(db, slug)
+
+    if check.author.username != user.username:
+        raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail="You are not the author of this article")
+
+    article = await articles_crud.change_article(db, slug, article_data, user)
     return GetArticle(article=article)
