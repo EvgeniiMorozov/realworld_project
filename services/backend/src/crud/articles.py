@@ -163,7 +163,7 @@ def create_comment(db: AsyncSession, data: CreateComment, slug: str, user: User)
     return db_comment
 
 
-def delete_comment(db: AsyncSession, slug: str, comment_id: str, user: User) -> None:
+def delete_comment(db: AsyncSession, slug: str, comment_id: int, user: User) -> None:
     """Delete the comment on slug and author of the article."""
     del_comment = (
         delete(Comment)
