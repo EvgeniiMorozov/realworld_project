@@ -103,3 +103,31 @@ async def update(article_db: models.ArticleDB, payload: models.ArticleInUpdate) 
 async def delete(article_db: models.ArticleDB) -> None:
     query = db.articles.delete().where(article_db.id == db.articles.c.id)
     await database.execute(query=query)
+
+
+async def get_all(
+    limit: int = 20, offset: int = 0, tag: str = None, author: str = None, favorited: str = None
+) -> list[models.ArticleDB]:
+    need_join = False
+    j = db.articles
+    query = select([db.articles]).limit(limit).offset(offset).order_by(desc(db.articles.c.created_at))
+    if tag:
+        need_join = True
+        j = j.join(db.tags_assoc, db.articles.c.id == db.tags_assoc.c.article_id)
+        query = query.where(db.tags_assoc.c.tag == tag)
+    if author:
+        user_db = await crud_user.get_user_by_username(username=author)
+        if user_db:
+            author_id = user_db.id
+            query = query.where(author_id == db.articles.c.author_id)
+    if favorited:
+        user_db = await crud_user.get_user_by_username(username=favorited)
+        if user_db:
+            favorited_id = user_db.id
+            need_join = True
+            j = j.join(db.favoriter_assoc, db.articles.c.id == db.favoriter_assoc.c.article_id)
+            query = query.where(favorited_id == db.favoriter_assoc.c.user_id)
+    if need_join:
+        query = query.select_from(j)
+    articles = await database.fetch_all(query=query)
+    return [models.ArticleDB(**article) for article in articles]
