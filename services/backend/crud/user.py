@@ -27,3 +27,15 @@ async def get_user_by_email(email: str) -> Optional[models.UserDB]:
     query = db.users.select().where(email == db.users.c.email)
     user_row = await database.fetch_one(query=query)
     return models.UserDB(**user_row) if user_row else None
+
+
+async def get_user_by_username(username: str) -> Optional[models.UserDB]:
+    query = db.users.select().where(username == db.users.c.username)
+    user_row = await database.fetch_one(query=query)
+    return models.UserDB(**user_row) if user_row else None
+
+
+async def update(user_id: int, payload: models.UserUpdate) -> int:
+    update_data = payload.dict(exclude_unset=True)
+    query = db.users.update().where(user_id == db.users.c.id).values(update_data).returning(db.users.c.id)
+    return await database.execute(query=query)
