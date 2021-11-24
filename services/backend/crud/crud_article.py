@@ -77,3 +77,12 @@ async def is_article_favorited_by_user(article_id: int, user_id: int) -> bool:
     row = await database.fetch_one(query=query)
     return row is not None
 
+
+async def count_article_favorites(article_id: int) -> int:
+    query = (
+        select([func.count()])
+        .select_from(db.favoriter_assoc)
+        .where(db.favoriter_assoc.c.article_id == article_id)
+    )
+    row = await database.fetch_one(query=query)
+    return dict(**row).get("count_1", 0)
