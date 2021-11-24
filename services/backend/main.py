@@ -1,10 +1,14 @@
 from fastapi import FastAPI
 from uvicorn import run
+from loguru import logger
 
 from db.base import database
+from endpoints.router import api_router
 
 
 app = FastAPI()
+
+app.include_router(api_router, prefix="/api")
 
 
 @app.get("/")
@@ -14,11 +18,13 @@ async def index():
 
 @app.on_event("startup")
 async def startup():
+    logger.info("Connect to database")
     await database.connect()
 
 
 @app.on_event("shutdown")
 async def shutdown():
+    logger.info("Disconnect to database")
     await database.disconnect()
 
 
