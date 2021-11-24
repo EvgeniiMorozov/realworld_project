@@ -5,7 +5,6 @@ import models
 from core import security
 from crud import crud_user
 
-
 router = APIRouter()
 
 
@@ -20,7 +19,7 @@ async def register(user_in: models.UserCreate = Body(..., embed=True, alias="use
     if user_db:
         raise HTTPException(
             status_code=HTTP_400_BAD_REQUEST,
-            detail=f"The user with username '{user_in.username}' already exists in the system"
+            detail=f"The user with username '{user_in.username}' already exists in the system",
         )
     user_id = await crud_user.create(user_in)
     token = security.create_access_token(user_id)
@@ -42,7 +41,7 @@ async def register(user_in: models.UserCreate = Body(..., embed=True, alias="use
     response_model=models.UserResponse,
 )
 async def login(
-        user_login: models.LoginUser = Body(..., embed=True, alias="user", name="Credentials to use"),
+    user_login: models.LoginUser = Body(..., embed=True, alias="user", name="Credentials to use"),
 ) -> models.UserResponse:
     user = await crud_user.authenticate(email=user_login.email, password=user_login.password)
     if not user:
