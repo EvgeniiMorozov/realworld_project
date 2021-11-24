@@ -38,3 +38,33 @@ async def create_article_comment(
             author=profile,
         )
     )
+
+
+@router.get(
+    "",
+    name="Get comments for an article",
+    description="Get comments for an article. Auth is optional.",
+    response_model=models.MultipleCommentsInResponse,
+)
+async def get_comments_from_an_article(
+    slug: str,
+    current_user: models.UserDB = Depends(get_current_user(required=False)),
+) -> models.MultipleCommentsInResponse:
+    article_db = await crud_article.get_article_by_slug(slug=slug)
+    if article_db is None:
+        raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail=SLUG_NOT_FOUND)
+
+    comment_dbs = await crud_comment.get_comments_from_an_article(article_id=article_db.id)
+    comments = []
+    for comment_db in comment_dbs:
+        profile = await crud_profile.get_profile_by_user_id(comment_db.author_id, requested_user=current_user)
+        comments.append(
+            models.CommentForResponse(
+                id=comment_db.id,
+                body=comment_db.body,
+                createdAt=comment_db.created_at,
+                updatedAt=comment_db.updated_at,
+                author=profile,
+            )
+        )
+    return models.MultipleCommentsInResponse(comments=comments)
