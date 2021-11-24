@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Body, Depends, HTTPException
-from starlette.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_403_FORBIDDEN
+from starlette.status import HTTP_400_BAD_REQUEST, HTTP_403_FORBIDDEN
 
 import models
-from endpoints import utils
 from crud import crud_article, crud_profile
+from endpoints import utils
 
 SLUG_NOT_FOUND = "article with this slug not found"
 AUTHOR_NOT_EXISTED = "This article's author not existed"
@@ -222,4 +222,22 @@ async def favorite_article(
         raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail=SLUG_NOT_FOUND)
     await crud_article.favorite(article_id=article.id, user_id=current_user.id)
 
+    return await get_article_response_by_slug(slug=slug, current_user=current_user)
+
+
+@router.delete(
+    "/{slug}/favorite",
+    name="Unfavorite an article",
+    description="Unfavorite an article. Auth is required.",
+    response_model=models.ArticleInResponse,
+)
+async def unfavorite_article(
+    slug: str,
+    current_user: models.UserDB = Depends(utils.get_current_user(required=True)),
+) -> models.ArticleInResponse:
+    article = await crud_article.get_article_by_slug(slug=slug)
+    if article is None:
+        raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail=SLUG_NOT_FOUND)
+
+    await crud_article.unfavorite(article_id=article.id, user_id=current_user.id)
     return await get_article_response_by_slug(slug=slug, current_user=current_user)
