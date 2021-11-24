@@ -9,7 +9,6 @@ from starlette import status
 
 from core.config import settings
 
-
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 ALGORITHM = "HS256"
@@ -23,3 +22,20 @@ def create_access_token(subject: Union[str, Any], expires_delta: timedelta = Non
 
     to_encode = {"exp": expire, "sub": str(subject)}
     return jwt.encode(to_encode, settings.SECRET_KEY, algorithm=ALGORITHM)
+
+
+def get_user_id_from_token(token: str) -> str:
+    try:
+        payload = jwt.encode(token, settings.SECRET_KEY, algorithm=ALGORITHM)
+        user_id = payload.get("sub", None)
+        return user_id
+    except (jwt.JWTError, ValidationError):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Could not validate credentials")
+
+
+def verify_password(plain_password: SecretStr, hashed_password: str) -> bool:
+    return pwd_context.verify(plain_password.get_secret_value(), hashed_password)
+
+
+def get_password_hash(password: SecretStr) -> str:
+    return pwd_context.hash(password.get_secret_value())
