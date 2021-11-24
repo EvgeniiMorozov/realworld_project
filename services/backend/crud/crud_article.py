@@ -57,7 +57,12 @@ async def create(payload: models.ArticleInCreate, author_id: int) -> int:
 async def get(article_id: int) -> Optional[models.ArticleDB]:
     query = db.articles.select().where(article_id == db.articles.c.id)
     article_row = await database.fetch_one(query=query)
-    if article_row:
-        return models.ArticleDB(**article_row)
-    else:
-        return None
+
+    return models.ArticleDB(**article_row) if article_row else None
+
+
+async def get_article_by_slug(slug: str) -> Optional[models.ArticleDB]:
+    query = db.articles.select().where(slug == db.articles.c.slug)
+    article_row = await database.fetch_one(query=query)
+
+    return models.ArticleDB(**article_row) if article_row else None
