@@ -39,3 +39,26 @@ def authorization_header_token_optional(
 
 def authorization_header_token(required: bool = True) -> Callable:
     return authorization_header_token_required if required else authorization_header_token_optional
+
+
+async def get_current_user_required(
+    token: str = Depends(authorization_header_token(required=True)),
+) -> models.UserDB:
+    user_id = security.get_user_id_from_token(token=token)
+    user_db = await crud_user.get(int(user_id))
+    if not user_db:
+        raise HTTPException(status_code=404, detail="User not found")
+    return user_db
+
+
+async def get_current_user_required_optional(
+    token: str = Depends(authorization_header_token(required=False)),
+) -> Optional[models.UserDB]:
+    if token is None:
+        return None
+    user_id = security.get_user_id_from_token(token=token)
+    return await crud_user.get(int(user_id))
+
+
+def get_current_user(required: bool = True) -> Callable:  # type: ignore
+    return get_current_user_required if required else get_current_user_required_optional
