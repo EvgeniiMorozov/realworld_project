@@ -51,5 +51,3 @@ class ArticleInUpdate(BaseModel):
 class MultipleArticlesInResponse(BaseModel):
     articles: list[ArticleForResponse]
     articlesCount: int
-
-
