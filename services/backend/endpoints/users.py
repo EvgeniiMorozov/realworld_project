@@ -3,9 +3,8 @@ from starlette.status import HTTP_400_BAD_REQUEST
 
 import models
 from core import security
-from endpoints import utils
 from crud import crud_user
-
+from endpoints import utils
 
 router = APIRouter()
 
@@ -24,6 +23,40 @@ async def retrieve_current_user(current_user: models.UserDB = Depends(utils.get_
             email=current_user.email,
             bio=current_user.bio,
             image=current_user.image,
+            token=token,
+        )
+    )
+
+
+@router.put(
+    "",
+    name="Update current user",
+    description="Updated user information for current user",
+    response_model=models.UserResponse,
+)
+async def update_current_user(
+    user_update: models.UserUpdate = Body(..., embed=True, alias="user"),
+    current_user: models.UserDB = Depends(utils.get_current_user),
+) -> models.UserResponse:
+    if user_update.username and user_update.username != current_user.username:
+        user_db = await crud_user.get_user_by_username(username=user_update.username)
+        if user_db:
+            raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail="user with this username already exists")
+
+    if user_update.email and user_update.email != current_user.email:
+        user_db = await crud_user.get_user_by_email(email=user_update.email)
+        if user_db:
+            raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail="user with this email already exists")
+
+    user_id = await crud_user.update(user_id=current_user.id, payload=user_update)
+    user_db = await crud_user.get(user_id)
+    token = security.create_access_token(current_user.id)
+    return models.UserResponse(
+        user=models.UserWithToken(
+            username=user_db.username,
+            email=user_db.email,
+            bio=user_db.bio,
+            image=user_db.image,
             token=token,
         )
     )
