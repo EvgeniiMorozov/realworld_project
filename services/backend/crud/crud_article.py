@@ -98,3 +98,8 @@ async def update(article_db: models.ArticleDB, payload: models.ArticleInUpdate) 
         remove_tags = list(set(old_tags) - set(new_tags))
         await add_article_tags(article_db.id, add_tags)
         await remove_article_tags(article_db.id, remove_tags)
+
+
+async def delete(article_db: models.ArticleDB) -> None:
+    query = db.articles.delete().where(article_db.id == db.articles.c.id)
+    await database.execute(query=query)
