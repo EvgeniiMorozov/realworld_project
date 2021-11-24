@@ -36,7 +36,7 @@ articles = Table(
     Column("body", Text),
     Column("author_id", Integer, ForeignKey("users.id")),
     Column("created_at", TIMESTAMP(timezone=True), nullable=False, server_default=func.now()),
-    Column("updated_at", TIMESTAMP(timezone=True), nullable=True, server_onupdate=func.now()),
+    Column("updated_at", TIMESTAMP(timezone=True), nullable=True, server_default=func.now()),
 )
 
 tags_assoc = Table(
