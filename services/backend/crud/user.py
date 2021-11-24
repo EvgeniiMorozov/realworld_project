@@ -21,3 +21,9 @@ async def get(user_id: int) -> Optional[models.UserDB]:
     query = db.users.select().where(user_id == db.users.c.id)
     user_row = await database.fetch_one(query=query)
     return models.UserDB(**user_row) if user_row else None
+
+
+async def get_user_by_email(email: str) -> Optional[models.UserDB]:
+    query = db.users.select().where(email == db.users.c.email)
+    user_row = await database.fetch_one(query=query)
+    return models.UserDB(**user_row) if user_row else None
