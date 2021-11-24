@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Body, Depends, HTTPException
-from starlette.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUEST
+from starlette.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_403_FORBIDDEN
 
 import models
 from endpoints import utils
@@ -145,3 +145,18 @@ async def update_article(
     await crud_article.update(article_db, payload=article_in)
 
     return await get_article_response_by_slug(slug=slug, current_user=current_user)
+
+
+@router.delete("/{slug}", name="Delete an article", description="Delete an article. Auth is required.")
+async def delete_article(
+    slug: str,
+    current_user: models.UserDB = Depends(utils.get_current_user(required=True)),
+) -> None:
+    article_db = await crud_article.get_article_by_slug(slug=slug)
+    if article_db is None:
+        raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail=SLUG_NOT_FOUND)
+
+    if article_db.author_id != current_user.id:
+        raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="cannot delete an article owner by other user")
+
+    await crud_article.delete(article_db)
