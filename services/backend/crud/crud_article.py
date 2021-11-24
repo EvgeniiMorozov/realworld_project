@@ -66,3 +66,14 @@ async def get_article_by_slug(slug: str) -> Optional[models.ArticleDB]:
     article_row = await database.fetch_one(query=query)
 
     return models.ArticleDB(**article_row) if article_row else None
+
+
+async def is_article_favorited_by_user(article_id: int, user_id: int) -> bool:
+    query = (
+        db.favoriter_assoc.select()
+        .where(article_id == db.favoriter_assoc.c.article_id)
+        .where(user_id == db.favoriter_assoc.c.user_id)
+    )
+    row = await database.fetch_one(query=query)
+    return row is not None
+
