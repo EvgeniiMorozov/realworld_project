@@ -26,3 +26,15 @@ async def get_profile_by_user_id(
     profile = models.Profile(username=user_db.username, bio=user_db.bio, image=user_db.image)
     profile.following = await is_following(user_db, requested_user)
     return profile
+
+
+async def is_following(follower: models.UserDB, follower_by: Optional[models.UserDB]) -> bool:
+    if follower_by is None:
+        return False
+    query = (
+        db.followers_assoc.select()
+        .where(follower.id == db.followers_assoc.c.follower)
+        .where(follower_by.id == db.followers_assoc.c.followed_by)
+    )
+    row = await database.fetch_one(query=query)
+    return row is not None
