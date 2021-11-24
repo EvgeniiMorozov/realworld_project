@@ -23,8 +23,14 @@ async def add_article_tags(article_id: int, tags: list[str]) -> None:
 async def remove_article_tags(article_id: int, tags: list[str]) -> None:
     if tags:
         query = (
-            db.tags_assoc.delete()
-            .where(db.tags_assoc.c.article_id == article_id)
-            .where(db.tags_assoc.c.tag.in_(tags))
+            db.tags_assoc.delete().where(db.tags_assoc.c.article_id == article_id).where(db.tags_assoc.c.tag.in_(tags))
         )
         await database.execute(query=query)
+
+
+async def get_article_tags(article_id: int) -> list[str]:
+    query = (
+        db.tags_assoc.select().with_only_columns([db.tags_assoc.c.tag]).where(article_id == db.tags_assoc.c.article_id)
+    )
+    tags = await database.fetch_all(query=query)
+    return [tag.get("tag") for tag in tags]
