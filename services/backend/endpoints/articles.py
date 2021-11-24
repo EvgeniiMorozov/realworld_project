@@ -113,3 +113,16 @@ async def feed_articles(
         )
         articles.append(article_for_response)
     return models.MultipleArticlesInResponse(articles=articles, articlesCount=len(articles))
+
+
+@router.get(
+    "/{slug}",
+    name="Get an article",
+    description="Get an article. Auth not required.",
+    response_model=models.ArticleInResponse,
+)
+async def get_article(
+    slug: str,
+    current_user: models.UserDB = Depends(utils.get_current_user),
+) -> models.ArticleInResponse:
+    return await get_article_response_by_slug(slug=slug, current_user=current_user)
