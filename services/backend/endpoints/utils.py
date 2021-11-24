@@ -35,3 +35,7 @@ def authorization_header_token_optional(
     if token_prefix != JWT_TOKEN_PREFIX:
         return None
     return token
+
+
+def authorization_header_token(required: bool = True) -> Callable:
+    return authorization_header_token_required if required else authorization_header_token_optional
