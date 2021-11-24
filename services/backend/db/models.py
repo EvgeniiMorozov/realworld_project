@@ -20,13 +20,11 @@ followers_assoc = Table(
     Column("followed_by", Integer, ForeignKey("users.id"), primary_key=True, index=True),
 )
 
-
 tags = Table(
     "tags",
     metadata,
     Column("tag", String, primary_key=True, index=True),
 )
-
 
 articles = Table(
     "articles",
