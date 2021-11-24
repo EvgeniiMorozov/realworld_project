@@ -52,3 +52,12 @@ async def create(payload: models.ArticleInCreate, author_id: int) -> int:
                 await crud_tag.create(tag)
         await add_article_tags(article_id, payload.tagList)
     return article_id
+
+
+async def get(article_id: int) -> Optional[models.ArticleDB]:
+    query = db.articles.select().where(article_id == db.articles.c.id)
+    article_row = await database.fetch_one(query=query)
+    if article_row:
+        return models.ArticleDB(**article_row)
+    else:
+        return None
