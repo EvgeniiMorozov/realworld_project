@@ -164,3 +164,44 @@ async def delete_article(
         raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="cannot delete an article owner by other user")
 
     await crud_article.delete(article_db)
+
+
+@router.get(
+    "",
+    name="Get recent articles globally",
+    description="Get most recent articles globally. Use query parameters to filter results. Auth is optional.",
+    response_model=models.MultipleArticlesInResponse,
+)
+async def list_articles(
+    current_user: models.UserDB = Depends(utils.get_current_user(required=False)),
+    limit: int = 20,
+    offset: int = 0,
+    tag: str = None,
+    author: str = None,
+    favorited: str = None,
+) -> models.MultipleArticlesInResponse:
+    article_dbs = await crud_article.get_all(limit=limit, offset=offset, tag=tag, author=author, favorited=favorited)
+    articles = []
+    for article_db in article_dbs:
+        profile = await crud_profile.get_profile_by_user_id(article_db.author_id, requested_user=current_user)
+        tags = await crud_article.get_article_tags(article_db.id)
+        if current_user:
+            is_favorited = await crud_article.is_article_favorited_by_user(article_db.id, current_user.id)
+        else:
+            is_favorited = False
+        favorites_count = await crud_article.count_article_favorites(article_db.id)
+        article_for_response = models.ArticleForResponse(
+            slug=article_db.slug,
+            title=article_db.title,
+            description=article_db.description,
+            body=article_db.body,
+            createdAt=article_db.created_at,
+            updatedAt=article_db.updated_at,
+            author=profile,
+            tagList=tags,
+            favorited=is_favorited,
+            favoritesCount=favorites_count,
+        )
+        articles.append(article_for_response)
+
+    return models.MultipleArticlesInResponse(articles=articles, articlesCount=len(articles))
