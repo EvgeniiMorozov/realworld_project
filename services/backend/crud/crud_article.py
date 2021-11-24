@@ -79,10 +79,22 @@ async def is_article_favorited_by_user(article_id: int, user_id: int) -> bool:
 
 
 async def count_article_favorites(article_id: int) -> int:
-    query = (
-        select([func.count()])
-        .select_from(db.favoriter_assoc)
-        .where(db.favoriter_assoc.c.article_id == article_id)
-    )
+    query = select([func.count()]).select_from(db.favoriter_assoc).where(db.favoriter_assoc.c.article_id == article_id)
     row = await database.fetch_one(query=query)
     return dict(**row).get("count_1", 0)
+
+
+async def update(article_db: models.ArticleDB, payload: models.ArticleInUpdate) -> None:
+    update_data = payload.dict(exclude_unset=True)
+    update_data["updated_at"] = datetime.datetime.utcnow()
+    new_tags = update_data.pop("tagList", None)
+    old_tags = await get_article_tags(article_db.id) if new_tags is not None else []
+    query = (
+        db.articles.update().where(article_db.id == db.articles.c.id).values(update_data).returning(db.articles.c.id)
+    )
+    await database.execute(query=query)
+    if new_tags is not None:
+        add_tags = list(set(new_tags) - set(old_tags))
+        remove_tags = list(set(old_tags) - set(new_tags))
+        await add_article_tags(article_db.id, add_tags)
+        await remove_article_tags(article_db.id, remove_tags)
