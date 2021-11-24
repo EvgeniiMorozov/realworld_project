@@ -126,3 +126,22 @@ async def get_article(
     current_user: models.UserDB = Depends(utils.get_current_user),
 ) -> models.ArticleInResponse:
     return await get_article_response_by_slug(slug=slug, current_user=current_user)
+
+
+@router.put(
+    "/{slug}",
+    name="Update an article",
+    description="Update an article. Auth is required.",
+    response_model=models.ArticleInResponse,
+)
+async def update_article(
+    slug: str,
+    article_in: models.ArticleInUpdate = Body(..., embed=True, alias="article"),
+    current_user: models.UserDB = Depends(utils.get_current_user(required=True)),
+) -> models.ArticleInResponse:
+    article_db = await crud_article.get_article_by_slug(slug)
+    if article_db is None:
+        raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail=SLUG_NOT_FOUND)
+    await crud_article.update(article_db, payload=article_in)
+
+    return await get_article_response_by_slug(slug=slug, current_user=current_user)
