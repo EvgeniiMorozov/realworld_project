@@ -9,6 +9,13 @@ uvicorn = "*"
 sqlalchemy = "*"
 databases = {extras = ["postgresql"], version = "*"}
 psycopg2-binary = "*"
+asyncpg = "*"
+python-jose = {extras = ["cryptography"], version = "*"}
+passlib = "*"
+bcrypt = "*"
+python-slugify = "*"
+alembic = "*"
+loguru = "*"
 
 [dev-packages]
 mypy = "*"
