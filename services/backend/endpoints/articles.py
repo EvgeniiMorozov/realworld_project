@@ -205,3 +205,21 @@ async def list_articles(
         articles.append(article_for_response)
 
     return models.MultipleArticlesInResponse(articles=articles, articlesCount=len(articles))
+
+
+@router.post(
+    "/{slug}/favorite",
+    name="Favorite an article",
+    description="Favorite an article. Auth is required.",
+    response_model=models.ArticleInResponse,
+)
+async def favorite_article(
+    slug: str,
+    current_user: models.UserDB = Depends(utils.get_current_user(required=True)),
+) -> models.ArticleInResponse:
+    article = await crud_article.get_article_by_slug(slug=slug)
+    if article is None:
+        raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail=SLUG_NOT_FOUND)
+    await crud_article.favorite(article_id=article.id, user_id=current_user.id)
+
+    return await get_article_response_by_slug(slug=slug, current_user=current_user)
