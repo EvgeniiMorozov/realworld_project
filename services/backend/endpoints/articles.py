@@ -8,7 +8,27 @@ from crud import crud_article, crud_profile
 router = APIRouter()
 
 
-
+def gen_article_in_response(
+    article: models.ArticleDB,
+    favorited: bool,
+    favorites_count: int,
+    profile: models.Profile,
+    tags: list[str],
+) -> models.ArticleInResponse:
+    return models.ArticleInResponse(
+        article=models.ArticleForResponse(
+            slug=article.slug,
+            title=article.title,
+            description=article.description,
+            body=article.body,
+            createdAt=article.created_at,
+            updatedAt=article.updated_at,
+            author=profile,
+            tagList=tags,
+            favorited=favorited,
+            favoritesCount=favorites_count,
+        )
+    )
 
 
 @router.post(
@@ -18,8 +38,8 @@ router = APIRouter()
     response_model=models.ArticleInResponse,
 )
 async def create_article(
-        article_in: models.ArticleInCreate = Body(..., embed=True, alias="article"),
-        current_user: models.UserDB = Depends(utils.get_current_user(required=True)),
+    article_in: models.ArticleInCreate = Body(..., embed=True, alias="article"),
+    current_user: models.UserDB = Depends(utils.get_current_user(required=True)),
 ) -> models.ArticleInResponse:
     article_id = await crud_article.create(article_in, author_id=current_user.id)
     article = await crud_article.get(article_id)
