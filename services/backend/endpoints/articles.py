@@ -147,7 +147,11 @@ async def update_article(
     return await get_article_response_by_slug(slug=slug, current_user=current_user)
 
 
-@router.delete("/{slug}", name="Delete an article", description="Delete an article. Auth is required.")
+@router.delete(
+    "/{slug}",
+    name="Delete an article",
+    description="Delete an article. Auth is required.",
+)
 async def delete_article(
     slug: str,
     current_user: models.UserDB = Depends(utils.get_current_user(required=True)),
