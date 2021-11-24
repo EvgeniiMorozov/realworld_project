@@ -5,6 +5,9 @@ import models
 from endpoints import utils
 from crud import crud_article, crud_profile
 
+SLUG_NOT_FOUND = "article with this slug not found"
+AUTHOR_NOT_EXISTED = "This article's author not existed"
+
 router = APIRouter()
 
 
@@ -28,6 +31,27 @@ def gen_article_in_response(
             favorited=favorited,
             favoritesCount=favorites_count,
         )
+    )
+
+
+async def get_article_response_by_slug(slug: str, current_user: models.UserDB) -> models.ArticleInResponse:
+    article = await crud_article.get_article_by_slug(slug=slug)
+    if article is None:
+        raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail=SLUG_NOT_FOUND)
+
+    profile = await crud_profile.get_profile_by_user_id(article.author_id, requested_user=current_user)
+    tags = await crud_article.get_article_tags(article.id)
+    if current_user:
+        favorited = await crud_article.is_article_favorited_by_user(article.id, current_user.id)
+    else:
+        favorited = False
+    favorites_count = await crud_article.count_article_favorites(article.id)
+    return gen_article_in_response(
+        article=article,
+        favorited=favorited,
+        favorites_count=favorites_count,
+        profile=profile,
+        tags=tags,
     )
 
 
