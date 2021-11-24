@@ -38,3 +38,27 @@ async def is_following(follower: models.UserDB, follower_by: Optional[models.Use
     )
     row = await database.fetch_one(query=query)
     return row is not None
+
+
+async def follow(follower: models.UserDB, follower_by: models.UserDB) -> bool:
+    if await is_following(follower=follower, follower_by=follower_by):
+        return False
+    query = (
+        db.followers_assoc.insert()
+        .values(follower=follower.id, follower_by=follower_by.id)
+        .returning(db.followers_assoc.c.follower)
+    )
+    row = await database.fetch_one(query=query)
+    return row is not None
+
+
+async def unfollow(follower: models.UserDB, follower_by: models.UserDB) -> bool:
+    if not await is_following(follower=follower, follower_by=follower_by):
+        return False
+    query = (
+        db.followers_assoc.delete()
+        .where(db.followers_assoc.c.follower == follower.id)
+        .where(db.followers_assoc.c.followed_by == follower_by.id)
+    )
+    row = await database.fetch_one(query=query)
+    return row is not None
