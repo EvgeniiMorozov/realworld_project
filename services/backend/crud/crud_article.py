@@ -131,3 +131,11 @@ async def get_all(
         query = query.select_from(j)
     articles = await database.fetch_all(query=query)
     return [models.ArticleDB(**article) for article in articles]
+
+
+async def feed(follow_by: int, limit: int = 20, offset: int = 0) -> list[models.ArticleDB]:
+    query = select([db.articles]).limit(limit).offset(offset).order_by(desc(db.articles.c.created_at))
+    j = db.articles.join(db.followers_assoc, db.articles.c.author_id == db.followers_assoc.c.follower)
+    query = query.where(db.followers_assoc.c.followed_by == follow_by).select_from(j)
+    articles = await database.fetch_all(query=query)
+    return [models.ArticleDB(**article) for article in articles]
