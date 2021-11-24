@@ -3,9 +3,9 @@ from typing import Optional
 from pydantic import SecretStr
 
 import db
-from db.base import database
 import models
 from core.security import get_password_hash, verify_password
+from db.base import database
 
 
 async def create(payload: models.UserCreate) -> Optional[int]:
@@ -39,3 +39,12 @@ async def update(user_id: int, payload: models.UserUpdate) -> int:
     update_data = payload.dict(exclude_unset=True)
     query = db.users.update().where(user_id == db.users.c.id).values(update_data).returning(db.users.c.id)
     return await database.execute(query=query)
+
+
+async def authenticate(email: str, password: SecretStr) -> Optional[models.UserDB]:
+    user_db = await get_user_by_email(email)
+    if not user_db:
+        return None
+    if not verify_password(password, user_db.hashed_password):
+        return None
+    return user_db
