@@ -33,3 +33,27 @@ async def register(user_in: models.UserCreate = Body(..., embed=True, alias="use
             token=token,
         )
     )
+
+
+@router.post(
+    "/login",
+    name="Login and remember token",
+    description="Login for existing user",
+    response_model=models.UserResponse,
+)
+async def login(
+        user_login: models.LoginUser = Body(..., embed=True, alias="user", name="Credentials to use"),
+) -> models.UserResponse:
+    user = await crud_user.authenticate(email=user_login.email, password=user_login.password)
+    if not user:
+        raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail="Incorrect email or password")
+    token = security.create_access_token(user.id)
+    return models.UserResponse(
+        user=models.UserWithToken(
+            username=user.username,
+            email=user.email,
+            bio=user.bio,
+            image=user.image,
+            token=token,
+        )
+    )
