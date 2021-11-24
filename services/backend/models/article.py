@@ -20,7 +20,7 @@ class ArticleDB(ArticleBase):
     updated_at: datetime.datetime
 
 
-class ArticleINCreate(BaseModel):
+class ArticleInCreate(BaseModel):
     title: str
     description: str
     body: str
