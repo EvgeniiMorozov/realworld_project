@@ -15,3 +15,9 @@ async def create(payload: models.UserCreate) -> Optional[int]:
         hashed_password=get_password_hash(payload.password),
     )
     return database.execute(query=query)
+
+
+async def get(user_id: int) -> Optional[models.UserDB]:
+    query = db.users.select().where(user_id == db.users.c.id)
+    user_row = await database.fetch_one(query=query)
+    return models.UserDB(**user_row) if user_row else None
