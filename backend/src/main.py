@@ -6,7 +6,7 @@ from uvicorn import run
 from loguru import logger
 
 from core.config import settings
-from db.base import database
+from db import database
 from endpoints.router import api_router
 
 CURR_PATH = pathlib.Path()
