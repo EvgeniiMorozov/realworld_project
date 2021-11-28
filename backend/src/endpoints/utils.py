@@ -4,7 +4,7 @@ from fastapi import Depends, HTTPException
 from fastapi.security import APIKeyHeader
 from starlette import status
 
-import models
+import schemas
 from core import security
 from crud import crud_user
 
@@ -43,7 +43,7 @@ def authorization_header_token(required: bool = True) -> Callable:
 
 async def get_current_user_required(
     token: str = Depends(authorization_header_token(required=True)),
-) -> models.UserDB:
+) -> schemas.UserDB:
     user_id = security.get_user_id_from_token(token=token)
     user_db = await crud_user.get(int(user_id))
     if not user_db:
@@ -53,7 +53,7 @@ async def get_current_user_required(
 
 async def get_current_user_required_optional(
     token: str = Depends(authorization_header_token(required=False)),
-) -> Optional[models.UserDB]:
+) -> Optional[schemas.UserDB]:
     if token is None:
         return None
     user_id = security.get_user_id_from_token(token=token)

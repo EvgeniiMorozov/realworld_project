@@ -2,7 +2,7 @@ import datetime
 
 from pydantic import BaseModel
 
-import models
+import schemas
 
 
 class CommentBase(BaseModel):
@@ -25,7 +25,7 @@ class CommentForResponse(CommentBase):
     id: int
     createdAt: datetime.datetime
     updatedAt: datetime.datetime
-    author: models.Profile
+    author: schemas.Profile
 
 
 class CommentInResponse(BaseModel):

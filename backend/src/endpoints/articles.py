@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Body, Depends, HTTPException
 from starlette.status import HTTP_400_BAD_REQUEST, HTTP_403_FORBIDDEN
 
-import models
+import schemas
 from crud import crud_article, crud_profile
 from endpoints import utils
 
@@ -12,14 +12,14 @@ router = APIRouter()
 
 
 def gen_article_in_response(
-    article: models.ArticleDB,
+    article: schemas.ArticleDB,
     favorited: bool,
     favorites_count: int,
-    profile: models.Profile,
+    profile: schemas.Profile,
     tags: list[str],
-) -> models.ArticleInResponse:
-    return models.ArticleInResponse(
-        article=models.ArticleForResponse(
+) -> schemas.ArticleInResponse:
+    return schemas.ArticleInResponse(
+        article=schemas.ArticleForResponse(
             slug=article.slug,
             title=article.title,
             description=article.description,
@@ -34,7 +34,7 @@ def gen_article_in_response(
     )
 
 
-async def get_article_response_by_slug(slug: str, current_user: models.UserDB) -> models.ArticleInResponse:
+async def get_article_response_by_slug(slug: str, current_user: schemas.UserDB) -> schemas.ArticleInResponse:
     article = await crud_article.get_article_by_slug(slug=slug)
     if article is None:
         raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail=SLUG_NOT_FOUND)
@@ -59,12 +59,12 @@ async def get_article_response_by_slug(slug: str, current_user: models.UserDB) -
     "",
     name="Create an article",
     description="Create an article. Auth is required.",
-    response_model=models.ArticleInResponse,
+    response_model=schemas.ArticleInResponse,
 )
 async def create_article(
-    article_in: models.ArticleInCreate = Body(..., embed=True, alias="article"),
-    current_user: models.UserDB = Depends(utils.get_current_user(required=True)),
-) -> models.ArticleInResponse:
+    article_in: schemas.ArticleInCreate = Body(..., embed=True, alias="article"),
+    current_user: schemas.UserDB = Depends(utils.get_current_user(required=True)),
+) -> schemas.ArticleInResponse:
     article_id = await crud_article.create(article_in, author_id=current_user.id)
     article = await crud_article.get(article_id)
     profile = await crud_profile.get_profile_by_user_id(article.author_id, requested_user=current_user)
@@ -85,13 +85,13 @@ async def create_article(
     "/feed",
     name="Get articles from users you follow",
     description="Get most recent articles from users you follow. Use query parameters to limit. Auth is required.",
-    response_model=models.MultipleArticlesInResponse,
+    response_model=schemas.MultipleArticlesInResponse,
 )
 async def feed_articles(
-    current_user: models.UserDB = Depends(utils.get_current_user(required=True)),
+    current_user: schemas.UserDB = Depends(utils.get_current_user(required=True)),
     limit: int = 20,
     offset: int = 0,
-) -> models.MultipleArticlesInResponse:
+) -> schemas.MultipleArticlesInResponse:
     article_dbs = await crud_article.feed(limit=limit, offset=offset, follow_by=current_user.id)
     articles = []
     for article_db in article_dbs:
@@ -99,7 +99,7 @@ async def feed_articles(
         tags = await crud_article.get_article_tags(article_db.id)
         favorited = await crud_article.is_article_favorited_by_user(article_db.id, current_user.id)
         favorites_count = await crud_article.count_article_favorites(article_db.id)
-        article_for_response = models.ArticleForResponse(
+        article_for_response = schemas.ArticleForResponse(
             slug=article_db.slug,
             title=article_db.title,
             description=article_db.description,
@@ -112,19 +112,19 @@ async def feed_articles(
             favoritesCount=favorites_count,
         )
         articles.append(article_for_response)
-    return models.MultipleArticlesInResponse(articles=articles, articlesCount=len(articles))
+    return schemas.MultipleArticlesInResponse(articles=articles, articlesCount=len(articles))
 
 
 @router.get(
     "/{slug}",
     name="Get an article",
     description="Get an article. Auth not required.",
-    response_model=models.ArticleInResponse,
+    response_model=schemas.ArticleInResponse,
 )
 async def get_article(
     slug: str,
-    current_user: models.UserDB = Depends(utils.get_current_user),
-) -> models.ArticleInResponse:
+    current_user: schemas.UserDB = Depends(utils.get_current_user),
+) -> schemas.ArticleInResponse:
     return await get_article_response_by_slug(slug=slug, current_user=current_user)
 
 
@@ -132,13 +132,13 @@ async def get_article(
     "/{slug}",
     name="Update an article",
     description="Update an article. Auth is required.",
-    response_model=models.ArticleInResponse,
+    response_model=schemas.ArticleInResponse,
 )
 async def update_article(
     slug: str,
-    article_in: models.ArticleInUpdate = Body(..., embed=True, alias="article"),
-    current_user: models.UserDB = Depends(utils.get_current_user(required=True)),
-) -> models.ArticleInResponse:
+    article_in: schemas.ArticleInUpdate = Body(..., embed=True, alias="article"),
+    current_user: schemas.UserDB = Depends(utils.get_current_user(required=True)),
+) -> schemas.ArticleInResponse:
     article_db = await crud_article.get_article_by_slug(slug)
     if article_db is None:
         raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail=SLUG_NOT_FOUND)
@@ -154,7 +154,7 @@ async def update_article(
 )
 async def delete_article(
     slug: str,
-    current_user: models.UserDB = Depends(utils.get_current_user(required=True)),
+    current_user: schemas.UserDB = Depends(utils.get_current_user(required=True)),
 ) -> None:
     article_db = await crud_article.get_article_by_slug(slug=slug)
     if article_db is None:
@@ -170,16 +170,16 @@ async def delete_article(
     "",
     name="Get recent articles globally",
     description="Get most recent articles globally. Use query parameters to filter results. Auth is optional.",
-    response_model=models.MultipleArticlesInResponse,
+    response_model=schemas.MultipleArticlesInResponse,
 )
 async def list_articles(
-    current_user: models.UserDB = Depends(utils.get_current_user(required=False)),
+    current_user: schemas.UserDB = Depends(utils.get_current_user(required=False)),
     limit: int = 20,
     offset: int = 0,
     tag: str = None,
     author: str = None,
     favorited: str = None,
-) -> models.MultipleArticlesInResponse:
+) -> schemas.MultipleArticlesInResponse:
     article_dbs = await crud_article.get_all(limit=limit, offset=offset, tag=tag, author=author, favorited=favorited)
     articles = []
     for article_db in article_dbs:
@@ -190,7 +190,7 @@ async def list_articles(
         else:
             is_favorited = False
         favorites_count = await crud_article.count_article_favorites(article_db.id)
-        article_for_response = models.ArticleForResponse(
+        article_for_response = schemas.ArticleForResponse(
             slug=article_db.slug,
             title=article_db.title,
             description=article_db.description,
@@ -204,19 +204,19 @@ async def list_articles(
         )
         articles.append(article_for_response)
 
-    return models.MultipleArticlesInResponse(articles=articles, articlesCount=len(articles))
+    return schemas.MultipleArticlesInResponse(articles=articles, articlesCount=len(articles))
 
 
 @router.post(
     "/{slug}/favorite",
     name="Favorite an article",
     description="Favorite an article. Auth is required.",
-    response_model=models.ArticleInResponse,
+    response_model=schemas.ArticleInResponse,
 )
 async def favorite_article(
     slug: str,
-    current_user: models.UserDB = Depends(utils.get_current_user(required=True)),
-) -> models.ArticleInResponse:
+    current_user: schemas.UserDB = Depends(utils.get_current_user(required=True)),
+) -> schemas.ArticleInResponse:
     article = await crud_article.get_article_by_slug(slug=slug)
     if article is None:
         raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail=SLUG_NOT_FOUND)
@@ -229,12 +229,12 @@ async def favorite_article(
     "/{slug}/favorite",
     name="Unfavorite an article",
     description="Unfavorite an article. Auth is required.",
-    response_model=models.ArticleInResponse,
+    response_model=schemas.ArticleInResponse,
 )
 async def unfavorite_article(
     slug: str,
-    current_user: models.UserDB = Depends(utils.get_current_user(required=True)),
-) -> models.ArticleInResponse:
+    current_user: schemas.UserDB = Depends(utils.get_current_user(required=True)),
+) -> schemas.ArticleInResponse:
     article = await crud_article.get_article_by_slug(slug=slug)
     if article is None:
         raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail=SLUG_NOT_FOUND)

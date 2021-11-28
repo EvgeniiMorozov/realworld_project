@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Body, Depends, HTTPException
 from starlette.status import HTTP_400_BAD_REQUEST, HTTP_403_FORBIDDEN
 
-import models
+import schemas
 from crud import crud_article, crud_comment, crud_profile
 from endpoints.utils import get_current_user
 
@@ -14,13 +14,13 @@ router = APIRouter()
     "",
     name="Create a comment for an article",
     description="Create a comment for an article. Auth is required.",
-    response_model=models.CommentInResponse,
+    response_model=schemas.CommentInResponse,
 )
 async def create_article_comment(
     slug: str,
-    comment_in: models.CommentInCreate = Body(..., embed=True, alias="comment"),
-    current_user: models.UserDB = Depends(get_current_user(required=True)),
-) -> models.CommentInResponse:
+    comment_in: schemas.CommentInCreate = Body(..., embed=True, alias="comment"),
+    current_user: schemas.UserDB = Depends(get_current_user(required=True)),
+) -> schemas.CommentInResponse:
     article_db = await crud_article.get_article_by_slug(slug=slug)
     if article_db is None:
         raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail=SLUG_NOT_FOUND)
@@ -29,8 +29,8 @@ async def create_article_comment(
     comment_db = await crud_comment.get(comment_id)
     profile = await crud_profile.get_profile_by_user_id(comment_db.author_id, requested_user=current_user)
 
-    return models.CommentInResponse(
-        comment=models.CommentForResponse(
+    return schemas.CommentInResponse(
+        comment=schemas.CommentForResponse(
             id=comment_db.id,
             body=comment_db.body,
             createdAt=comment_db.created_at,
@@ -44,12 +44,12 @@ async def create_article_comment(
     "",
     name="Get comments for an article",
     description="Get comments for an article. Auth is optional.",
-    response_model=models.MultipleCommentsInResponse,
+    response_model=schemas.MultipleCommentsInResponse,
 )
 async def get_comments_from_an_article(
     slug: str,
-    current_user: models.UserDB = Depends(get_current_user(required=False)),
-) -> models.MultipleCommentsInResponse:
+    current_user: schemas.UserDB = Depends(get_current_user(required=False)),
+) -> schemas.MultipleCommentsInResponse:
     article_db = await crud_article.get_article_by_slug(slug=slug)
     if article_db is None:
         raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail=SLUG_NOT_FOUND)
@@ -59,7 +59,7 @@ async def get_comments_from_an_article(
     for comment_db in comment_dbs:
         profile = await crud_profile.get_profile_by_user_id(comment_db.author_id, requested_user=current_user)
         comments.append(
-            models.CommentForResponse(
+            schemas.CommentForResponse(
                 id=comment_db.id,
                 body=comment_db.body,
                 createdAt=comment_db.created_at,
@@ -67,7 +67,7 @@ async def get_comments_from_an_article(
                 author=profile,
             )
         )
-    return models.MultipleCommentsInResponse(comments=comments)
+    return schemas.MultipleCommentsInResponse(comments=comments)
 
 
 @router.delete(
@@ -78,7 +78,7 @@ async def get_comments_from_an_article(
 async def delete_comment_for_article(
     slug: str,
     comment_id: int,
-    current_user: models.UserDB = Depends(get_current_user(required=True)),
+    current_user: schemas.UserDB = Depends(get_current_user(required=True)),
 ) -> None:
     article_db = await crud_article.get_article_by_slug(slug=slug)
     if article_db is None:

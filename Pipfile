@@ -16,6 +16,7 @@ bcrypt = "*"
 python-slugify = "*"
 alembic = "*"
 loguru = "*"
+pydantic = {extras = ["dotenv"], version = "*"}
 
 [dev-packages]
 mypy = "*"
