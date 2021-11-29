@@ -3,7 +3,7 @@ from typing import Optional
 
 from pydantic import BaseModel
 
-import schemas
+from schemas.profile import Profile
 
 
 class ArticleBase(BaseModel):
@@ -29,7 +29,7 @@ class ArticleInCreate(BaseModel):
 
 class ArticleForResponse(ArticleBase):
     slug: str
-    author: schemas.Profile
+    author: Profile
     createdAt: datetime.datetime
     updatedAt: datetime.datetime
     tagList: Optional[list[str]]

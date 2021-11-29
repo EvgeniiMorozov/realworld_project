@@ -7,7 +7,7 @@ from loguru import logger
 
 from core.config import settings
 from db import database
-from endpoints.router import api_router
+from endpoints.routers import api_router
 
 CURR_PATH = pathlib.Path()
 TO_ALEMBIC_INI = CURR_PATH.parent
