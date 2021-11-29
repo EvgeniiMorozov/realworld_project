@@ -23,6 +23,7 @@ mypy = "*"
 black = "==21.10b0"
 flake8 = "*"
 isort = "*"
+sqlalchemy2-stubs = "==0.0.2.a19"
 
 [requires]
 python_version = "3.9"
