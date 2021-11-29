@@ -10,9 +10,9 @@ class Settings(BaseSettings):
     # 60 minutes * 24 hours * 8 days = 8 days
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8
     POSTGRES_SERVER: str = "127.0.0.1"
-    POSTGRES_USER: str = "postgres"
-    POSTGRES_PASSWORD: str = "postgres"
-    POSTGRES_DB: str = "realworld"
+    POSTGRES_USER: str = "root"
+    POSTGRES_PASSWORD: str = "Zz123456"
+    POSTGRES_DB: str = "realworld_project"
     SQLALCHEMY_DATABASE_URI: Optional[PostgresDsn] = None
 
     @validator("SQLALCHEMY_DATABASE_URI", pre=True)
@@ -26,6 +26,7 @@ class Settings(BaseSettings):
             user=values.get("POSTGRES_USER"),
             password=values.get("POSTGRES_PASSWORD"),
             host=values.get("POSTGRES_SERVER"),
+            port="37200",
             path=f"/{db_prefix}{values.get('POSTGRES_DB') or ''}"
         )
 

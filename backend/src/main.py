@@ -3,7 +3,7 @@ import pathlib
 
 from fastapi import FastAPI
 from uvicorn import run
-from loguru import logger
+# from loguru import logger
 
 from core.config import settings
 from db import database
@@ -25,13 +25,13 @@ async def index():
 
 @app.on_event("startup")
 async def startup():
-    logger.info("Connect to database")
+    # logger.info("Connect to database")
     await database.connect()
 
 
 @app.on_event("shutdown")
 async def shutdown():
-    logger.info("Disconnect to database")
+    # logger.info("Disconnect to database")
     await database.disconnect()
 
 
@@ -42,4 +42,4 @@ def make_corrections_in_the_alembic_ini():
 
 
 if __name__ == "__main__":
-    run("main:app", port=5000, host="0.0.0.0", reload=True)
+    run("main:app", port=5000, host="127.0.0.1", reload=False)
