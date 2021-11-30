@@ -10,10 +10,10 @@ from src.core import auth
 from src.db.base import get_session
 from src.db.users import Follow
 from src.db.users import User
-from src.models.users import NewUserRequest, UpdateUserRequest, UserResponce
+from src.models.users import NewUserRequest, UpdateUserRequest, UserResponce, User as UserDB
 
 
-async def create_user(db: AsyncSession, user: NewUserRequest):
+async def create_user(user: NewUserRequest, session: AsyncSession = Depends(get_session)) -> UserDB:
     """Create and return a created User model."""
     db_user = User(
         token=auth.encode_jwt(user.user.email, user.user.password),
@@ -23,32 +23,32 @@ async def create_user(db: AsyncSession, user: NewUserRequest):
         bio="default",
         image="default",
     )
-    await db.add(db_user)
-    await db.commit()
-    await db.refresh(db_user)
+    await session.add(db_user)
+    await session.commit()
+    await session.refresh(db_user)
     return db_user
 
 
-def change_user(db: AsyncSession, user: UserResponce, data: UpdateUserRequest) -> User:
+async def change_user(user: UserResponce, data: UpdateUserRequest, session: AsyncSession = Depends(get_session)) -> User:
     """Update and return User model."""
     upd_user = update(User).where(User.token == user.user.token).values(**data.user.dict(exclude_unset=True))
     # upd_user = update(User).where(User.token == user.token).values(**data.user.dict(exclude_unset=True))
-    db.execute(upd_user)
-    db.commit()
-    return db.query(User).filter(User.token == user.user.token).first()
+    await session.execute(upd_user)
+    await session.commit()
+    return await session.query(User).filter(User.token == user.user.token).first()
 
 
-def get_current_user_by_token(db: AsyncSession = Depends(get_session), token: str = Depends(auth.check_token)) -> User:
+async def get_current_user_by_token(session: AsyncSession = Depends(get_session), token: str = Depends(auth.check_token)) -> UserDB:
     """Getting a User model from a token and checking that the user exists."""
-    user = get_user_by_token(db, token)
+    user = await get_user_by_token(session, token)
     if not user:
         raise HTTPException(HTTP_401_UNAUTHORIZED, detail="Not authorized")
-    return get_user_by_token(db, token)
+    return user
 
 
-def get_user_by_token(db: AsyncSession, token: str) -> User:
+async def get_user_by_token(session: AsyncSession, token: str) -> User:
     """Get User model by token."""
-    return db.query(User).filter(User.token == token).first()
+    return await session.query(User).filter(User.token == token).first()
 
 
 def get_user_by_username(db: AsyncSession, username: str) -> User:
