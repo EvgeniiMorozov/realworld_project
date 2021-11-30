@@ -26,7 +26,7 @@ class Settings(BaseSettings):
             user=values.get("POSTGRES_USER"),
             password=values.get("POSTGRES_PASSWORD"),
             host=values.get("POSTGRES_SERVER"),
-            port="37200",
+            # port="5432",
             path=f"/{db_prefix}{values.get('POSTGRES_DB') or ''}"
         )
 
