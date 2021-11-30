@@ -8,7 +8,7 @@ from sqlalchemy import String
 from sqlalchemy.orm import backref
 from sqlalchemy.orm import relationship
 
-from db.base import Base
+from src.db.base import Base
 
 
 class User(Base):

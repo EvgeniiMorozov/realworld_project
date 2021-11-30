@@ -6,14 +6,14 @@ from sqlalchemy import update
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.status import HTTP_401_UNAUTHORIZED
 
-from core import auth
-from db.base import get_session
-from db.users import Follow
-from db.users import User
-from models.users import NewUserRequest, UpdateUserRequest, UserResponce
+from src.core import auth
+from src.db.base import get_session
+from src.db.users import Follow
+from src.db.users import User
+from src.models.users import NewUserRequest, UpdateUserRequest, UserResponce
 
 
-def create_user(db: AsyncSession, user: NewUserRequest):
+async def create_user(db: AsyncSession, user: NewUserRequest):
     """Create and return a created User model."""
     db_user = User(
         token=auth.encode_jwt(user.user.email, user.user.password),
@@ -23,9 +23,9 @@ def create_user(db: AsyncSession, user: NewUserRequest):
         bio="default",
         image="default",
     )
-    db.add(db_user)
-    db.commit()
-    db.refresh(db_user)
+    await db.add(db_user)
+    await db.commit()
+    await db.refresh(db_user)
     return db_user
 
 
