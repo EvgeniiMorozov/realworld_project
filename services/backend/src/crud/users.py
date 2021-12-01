@@ -13,7 +13,10 @@ from src.db.users import User
 from src.models.users import NewUserRequest, UpdateUserRequest, UserResponce, User as UserDB
 
 
-async def create_user(user: NewUserRequest, session: AsyncSession = Depends(get_session),) -> UserDB:
+async def create_user(
+    user: NewUserRequest,
+    session: AsyncSession = Depends(get_session),
+) -> UserDB:
     """Create and return a created User model."""
     db_user = User(
         token=auth.encode_jwt(user.user.email, user.user.password),
@@ -30,7 +33,9 @@ async def create_user(user: NewUserRequest, session: AsyncSession = Depends(get_
 
 
 async def change_user(
-    user: UserResponce, data: UpdateUserRequest, session: AsyncSession = Depends(get_session),
+    user: UserResponce,
+    data: UpdateUserRequest,
+    session: AsyncSession = Depends(get_session),
 ) -> User:
     """Update and return User model."""
     upd_user = update(User).where(User.token == user.user.token).values(**data.user.dict(exclude_unset=True))
@@ -45,42 +50,46 @@ async def get_current_user_by_token(
     token: str = Depends(auth.check_token),
 ) -> UserDB:
     """Getting a User model from a token and checking that the user exists."""
-    user = await get_user_by_token(session, token)
+    user = await get_user_by_token(token, session)
     if not user:
         raise HTTPException(HTTP_401_UNAUTHORIZED, detail="Not authorized")
     return user
 
 
-async def get_user_by_token(session: AsyncSession, token: str) -> User:
+async def get_user_by_token(token: str, session: AsyncSession = Depends(get_session)) -> User:
     """Get User model by token."""
     return await session.query(User).filter(User.token == token).first()
 
 
-async def get_user_by_username(session: AsyncSession, username: str) -> User:
+async def get_user_by_username(username: str, session: AsyncSession = Depends(get_session)) -> User:
     """Get User model by username."""
     return await session.query(User).filter(User.username == username).first()
 
 
-def get_user_by_email(db: AsyncSession, email: EmailStr) -> User:
+async def get_user_by_email(email: EmailStr, session: AsyncSession = Depends(get_session)) -> User:
     """Get User model by email."""
-    return db.query(User).filter(User.email == email).first()
+    return await session.query(User).filter(User.email == email).first()
 
 
-def create_subscribe(db: AsyncSession, user_username: str, author_username: str) -> None:
+async def create_subscribe(
+    user_username: str, author_username: str, session: AsyncSession = Depends(get_session)
+) -> None:
     """Create Follow model by user and author username."""
     db_subscribe = Follow(user=user_username, author=author_username)
-    db.add(db_subscribe)
-    db.commit()
+    await session.add(db_subscribe)
+    await session.commit()
 
 
-def delete_subscribe(db: AsyncSession, user_username: str, author_username: str) -> None:
+async def delete_subscribe(
+    user_username: str, author_username: str, session: AsyncSession = Depends(get_session)
+) -> None:
     """Delete Follow model by user and author username."""
     subscribe = delete(Follow).where(Follow.user == user_username, Follow.author == author_username)
-    db.execute(subscribe)
-    db.commit()
+    await session.execute(subscribe)
+    await session.commit()
 
 
-def check_subscribe(db: AsyncSession, follower: str, following: str) -> bool:
+async def check_subscribe(follower: str, following: str, session: AsyncSession = Depends(get_session)) -> bool:
     """Checking Follow model by user and author username."""
-    check = db.query(Follow).filter(Follow.user == follower, Follow.author == following)
-    return db.query(check.exists()).scalar()
+    check = await session.query(Follow).filter(Follow.user == follower, Follow.author == following)
+    return await session.query(check.exists()).scalar()

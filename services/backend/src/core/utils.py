@@ -1,13 +1,14 @@
+from fastapi import Depends
 from sqlalchemy import func
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from db.articles import Article
 from db.articles import Favorite
+from db.base import get_session
 from db.users import User
-from repositories.users import UserRepository
 
 
-def add_following(db: AsyncSession, user: User, follower: User) -> User:
+async def add_following(user: User, follower: User, session: AsyncSession = Depends(get_session), ) -> User:
     subscribe = UserRepository.check_subscribe(db, follower.username, user.username)
     if subscribe:
         user.following = True

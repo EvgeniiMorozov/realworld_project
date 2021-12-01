@@ -1,5 +1,6 @@
 from typing import Optional
 
+from fastapi import Depends
 from slugify import slugify
 from sqlalchemy import delete
 from sqlalchemy import desc
@@ -8,34 +9,35 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import contains_eager
 from sqlalchemy.sql.expression import or_
 
-from core import utils
-from crud import users
-from db.articles import Article
-from db.articles import Favorite
-from db.comments import Comment
-from db.tags import Tag
-from db.users import Follow
-from db.users import User
-from models.articles import CreateArticleRequest
-from models.articles import CreateComment
-from models.articles import UpdateArticle
+from db.base import get_session
+from src.core import utils
+from src.crud import users
+from src.db.articles import Article
+from src.db.articles import Favorite
+from src.db.comments import Comment
+from src.db.tags import Tag
+from src.db.users import Follow
+from src.db.users import User
+from src.models.articles import CreateArticleRequest
+from src.models.articles import CreateComment
+from src.models.articles import UpdateArticle
 
 
-def get_articles_auth_or_not(
-    db: AsyncSession,
+async def get_articles_auth_or_not(
     tag: Optional[str] = None,
     author: Optional[str] = None,
     favorited: Optional[str] = None,
     limit: Optional[int] = 20,
     offset: Optional[int] = 0,
     current_user: Optional[User] = None,
+    session: AsyncSession = Depends(get_session),
 ) -> list[Article]:
     """
     Get list Article for pydantic model. Auth is optional.
     Filtering by tag name, author username, favorited username.
     Optional receipt of articles by limit (default 20), offset (default 0).
     """
-    query = db.query(Article)
+    query = await session.query(Article)
     if tag:
         query = query.join(Article.tag).options(contains_eager(Article.tag)).filter(or_(tag is None, Tag.name == tag))
     if author:
