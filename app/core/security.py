@@ -24,9 +24,9 @@ def create_access_token(subject: Union[str, Any], expires_delta: timedelta = Non
     return jwt.encode(to_encode, settings.SECRET_KEY, algorithm=ALGORITHM)
 
 
-def get_user_id_from_token(token: str) -> str:
+def get_user_id_from_token(token: str):
     try:
-        payload = jwt.encode(token, settings.SECRET_KEY, algorithm=ALGORITHM)
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=ALGORITHM)
         user_id = payload.get("sub", None)
         return user_id
     except (jwt.JWTError, ValidationError):
