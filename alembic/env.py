@@ -6,7 +6,8 @@ from alembic import context
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
-from db import *
+sys.path.append(str(pathlib.Path().absolute()))
+
 
 # sys.path.append(str(pathlib.Path().absolute()))
 # sys.path = ['', '..'] + sys.path[1:]
@@ -25,11 +26,12 @@ fileConfig(config.config_file_name)
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-from core.config import settings
-from db.base import metadata
+from app import db
+from app.core.config import settings
 
 
-target_metadata = metadata
+target_metadata = db.metadata
+
 
 def get_url():
     return settings.SQLALCHEMY_DATABASE_URI
