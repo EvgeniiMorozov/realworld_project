@@ -1,2 +1,4 @@
-from db.base import *  # noqa # isort:skip
-from db.models import *  # noqa # isort:skip
+from db.base import *
+from db.models import *
+
+metadata.create_all(bind=engine)
