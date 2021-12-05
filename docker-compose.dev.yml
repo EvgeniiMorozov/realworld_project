@@ -24,13 +24,5 @@ services:
     depends_on:
       - db
 
-  # migration:
-  #   build: .
-  #   command: alembic upgrade head
-  #   environment:
-  #     - POSTGRES_SERVER=db
-  #   depends_on:
-  #     - db
-
 volumes:
   data:
