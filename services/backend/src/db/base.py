@@ -10,11 +10,6 @@ from src.core.config import DATABASE_URL
 async_engine = create_async_engine(DATABASE_URL, echo=True, future=True)
 
 
-@as_declarative()
-class Base(object):
-    pass
-
-
 async def init_db():
     async with async_engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
