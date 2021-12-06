@@ -12,7 +12,7 @@ bcrypt = "*"
 python-jose = "*"
 pyjwt = "*"
 python-slugify = "*"
-pydantic = {extras = ["email"], version = "*"}
+pydantic = {extras = ["dotenv"], version = "*"}
 asyncpg = "*"
 
 [dev-packages]
