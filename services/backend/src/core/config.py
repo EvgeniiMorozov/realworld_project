@@ -4,7 +4,7 @@ import secrets
 from typing import Any, Optional
 from dotenv import load_dotenv
 
-from pydantic import BaseSettings
+from pydantic import BaseSettings, validator
 from pydantic.networks import PostgresDsn
 
 current_path = pathlib.Path.cwd().absolute()
@@ -28,7 +28,7 @@ class Settings(BaseSettings):
         env_file = ".env"
         env_file_encoding = 'utf-8'
 
-    @validator("_DATABASE_URI", pre=True)
+    @validator("DATABASE_URI", pre=True)
     def assemble_db_connection(cls, v: Optional[str], values: dict[str, Any]) -> Any:
         if isinstance(v, str):
             return v
@@ -42,3 +42,6 @@ class Settings(BaseSettings):
             # port="5432",
             path=f"/{db_prefix}{values.get('POSTGRES_DB') or ''}"
         )
+
+
+settings = Settings()

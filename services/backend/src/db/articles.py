@@ -12,9 +12,7 @@ from db.base import Base
 
 
 class Article(Base):
-    __tablename__ = "articles"
 
-    id = Column(Integer, primary_key=True)
     slug = Column(String(100), unique=True)
     title = Column(String(100))
     description = Column(Text)
@@ -28,9 +26,7 @@ class Article(Base):
 
 
 class Favorite(Base):
-    __tablename__ = "favorites"
 
-    id = Column(Integer, primary_key=True)
     user = Column(String(80), ForeignKey("users.username", ondelete="CASCADE"))
     article = Column(String(100), ForeignKey("articles.slug", ondelete="CASCADE"))
 

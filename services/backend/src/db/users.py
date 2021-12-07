@@ -12,9 +12,7 @@ from src.db.base import Base
 
 
 class User(Base):
-    __tablename__ = "users"
 
-    id = Column(Integer, primary_key=True, autoincrement=True, unique=True)
     username = Column(String(80), unique=True, nullable=False)
     email = Column(String(100), unique=True, nullable=False)
     password = Column(String(128), nullable=True)
@@ -33,9 +31,7 @@ class User(Base):
 
 
 class Follow(Base):
-    __tablename__ = "followers"
 
-    id = Column(Integer, primary_key=True)
     user = Column(String(80), ForeignKey("users.username", ondelete="CASCADE"))
     author = Column(String(80), ForeignKey("users.username", ondelete="CASCADE"))
 
