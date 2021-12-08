@@ -15,9 +15,9 @@ async_engine = create_async_engine(settings.DATABASE_URI, echo=True, future=True
 
 @as_declarative()
 class Base(object):
-    @declared_attr
-    def __tablename__(cls):
-        return cls.__name__.lower()
+    # @declared_attr
+    # def __tablename__(cls):
+    #     return cls.__name__.lower()
 
     id = Column(Integer, primary_key=True, index=True)
 
