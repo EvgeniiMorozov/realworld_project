@@ -1,10 +1,10 @@
 from typing import Any
 
-from sqlalchemy import Column, Integer
+from sqlalchemy import Column, Integer, TIMESTAMP
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.ext.declarative import as_declarative, declared_attr
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, declarative_mixin
 
 
 from src.core.config import settings
@@ -20,6 +20,12 @@ class Base(object):
     #     return cls.__name__.lower()
 
     id = Column(Integer, primary_key=True, index=True)
+
+
+@declarative_mixin
+class TimestampMixin:
+    created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=func.now())
+    updated_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=func.now())
 
 
 async def init_db():
