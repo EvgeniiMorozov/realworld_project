@@ -1,7 +1,14 @@
-from sqlalchemy import Column, String, TIMESTAMP, func, ForeignKey, Integer, Text
-from sqlalchemy.orm import relationship, backref
-
 from base import Base, TimestampMixin
+from sqlalchemy import (
+    TIMESTAMP,
+    Column,
+    ForeignKey,
+    Integer,
+    String,
+    Text,
+    func,
+)
+from sqlalchemy.orm import backref, relationship
 
 
 class User(Base):
