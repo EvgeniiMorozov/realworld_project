@@ -26,7 +26,7 @@ class Settings(BaseSettings):
 
     class Config:
         env_file = ".env"
-        env_file_encoding = 'utf-8'
+        env_file_encoding = "utf-8"
 
     @validator("DATABASE_URI", pre=True)
     def assemble_db_connection(cls, v: Optional[str], values: dict[str, Any]) -> Any:
@@ -40,7 +40,15 @@ class Settings(BaseSettings):
             password=values.get("POSTGRES_PASSWORD"),
             host=values.get("POSTGRES_SERVER"),
             # port="5432",
-            path=f"/{db_prefix}{values.get('POSTGRES_DB') or ''}"
+            path=f"/{db_prefix}{values.get('POSTGRES_DB') or ''}",
+        )
+
+    @property
+    def async_database_url(self) -> Optional[str]:
+        return (
+            self.DATABASE_URI.replace("postgresql://", "postgresql+asyncpg://")
+            if self.DATABASE_URI
+            else self.DATABASE_URI
         )
 
 
