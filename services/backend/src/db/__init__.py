@@ -1,5 +1,1 @@
-from models import User, Article, Follow
-
-users = User()
-articles = Article()
-followers = Follow()
+from connection import async_session, engine
