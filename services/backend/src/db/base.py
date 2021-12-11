@@ -1,23 +1,19 @@
-from typing import Any
-
-from sqlalchemy import Column, Integer, TIMESTAMP
+from sqlalchemy import Column
+from sqlalchemy import func
+from sqlalchemy import Integer
+from sqlalchemy import TIMESTAMP
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.ext.asyncio import create_async_engine
-from sqlalchemy.ext.declarative import as_declarative, declared_attr
-from sqlalchemy.orm import sessionmaker, declarative_mixin
-
-
+from sqlalchemy.ext.declarative import as_declarative
+from sqlalchemy.orm import declarative_mixin
+from sqlalchemy.orm import sessionmaker
 from src.core.config import settings
-
 
 async_engine = create_async_engine(settings.DATABASE_URI, echo=True, future=True)
 
 
 @as_declarative()
 class Base(object):
-    # @declared_attr
-    # def __tablename__(cls):
-    #     return cls.__name__.lower()
 
     id = Column(Integer, primary_key=True, index=True)
 
