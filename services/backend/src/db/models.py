@@ -1,3 +1,4 @@
+from sqlalchemy.sql.schema import Table
 from base import Base, TimestampMixin
 from sqlalchemy import (
     TIMESTAMP,
@@ -56,18 +57,20 @@ class Follow(Base):
         return f"Follow - user: {self.user}, author: {self.user}"
 
 
-class ArticleTag(Base):
-    __tablename__ = "article_tag"
+article_tag_table = Table(
+    "user_article",
+    Base.metadata,
+    Column("user_id", ForeignKey("user.id", ondelete="CASCADE")),
+    Column("article_id", ForeignKey("articles.id", ondelete="CASCADE")),
+)
 
-    article_id = Column(Integer, ForeignKey("articles.id", ondelete="CASCADE"))
-    tag_name = Column(String(50), ForeignKey("tags.name", ondelete="CASCADE"))
 
-
-class UserArticle(Base):
-    __tablename__ = "user_article"
-
-    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"))
-    article_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"))
+user_article_table = Table(
+    "user_article",
+    Base.metadata,
+    Column("user_id", ForeignKey("users.id", ondelete="CASCADE")),
+    Column("article_id", ForeignKey("articles.id", ondelete="CASCADE")),
+)
 
 
 class Article(TimestampMixin, Base):
