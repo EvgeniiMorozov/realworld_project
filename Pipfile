@@ -6,7 +6,7 @@ name = "pypi"
 [packages]
 fastapi = "*"
 uvicorn = "*"
-sqlalchemy = {extras = ["asyncio"], version = "*"}
+sqlalchemy = {extras = ["mypy"], version = "*"}
 databases = {extras = ["postgresql"], version = "*"}
 bcrypt = "*"
 python-jose = "*"
