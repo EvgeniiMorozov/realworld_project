@@ -1,8 +1,6 @@
 from typing import Optional
 
-from pydantic import BaseModel
-from pydantic import EmailStr
-from pydantic import HttpUrl
+from pydantic import BaseModel, EmailStr, HttpUrl
 
 
 class LoginUser(BaseModel):
