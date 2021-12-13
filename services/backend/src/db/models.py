@@ -17,7 +17,7 @@ class User(Base):
 
     username = Column(String(80), unique=True, nullable=False)
     email = Column(String(100), unique=True, nullable=False)
-    password_hash = Column(String(128), nullable=True)
+    hashed_password = Column(String(128), nullable=True)
     bio = Column(String(300), nullable=True)
     image = Column(String(120), nullable=True)
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=func.now())
