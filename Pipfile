@@ -14,6 +14,7 @@ pyjwt = "*"
 python-slugify = "*"
 pydantic = {extras = ["dotenv"], version = "*"}
 asyncpg = "*"
+passlib = "*"
 
 [dev-packages]
 mypy = "*"
