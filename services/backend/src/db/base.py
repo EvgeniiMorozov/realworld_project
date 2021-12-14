@@ -1,11 +1,7 @@
-from sqlalchemy import TIMESTAMP, Column, Integer, func
-from sqlalchemy.ext.declarative import as_declarative
-from sqlalchemy.orm import declarative_mixin
+from sqlalchemy import TIMESTAMP, Column, func
+from sqlalchemy.orm import declarative_base, declarative_mixin
 
-
-@as_declarative()
-class Base(object):
-    id = Column(Integer, primary_key=True, index=True)
+Base = declarative_base()
 
 
 @declarative_mixin
