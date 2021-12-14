@@ -16,9 +16,9 @@ class UserRepository(BaseRepository):
             email=payload.email,
             hashed_password=get_password_hash(payload.password),
             )
-        # self.db_session.add(new_user)
         result = await self.db_session.execute(new_user)
         await self.db_session.flush()
+        return result.scalar()
 
     async def get(self):
         pass
