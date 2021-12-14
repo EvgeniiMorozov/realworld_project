@@ -1,7 +1,8 @@
+import asyncio
 import datetime
 from typing import Optional
 
-from pydantic import SecretStr
+from pydantic import SecretStr, EmailStr
 from sqlalchemy.sql.expression import select
 
 import src.db as db
@@ -22,13 +23,16 @@ class UserRepository(BaseRepository):
         return new_user
 
     async def get(self, user_id: int) -> Optional[schemas.UserDB]:
-        query = select(db.User).where(db.users.c.id == user_id)
+        query = select(db.User).where(db.User.c.id == user_id)
         result = await self.db_session.execute(query)
         await self.db_session.flush()
-        return result.scalars().first()
+        return schemas.UserDB(**result.scalars().first()) if result else None
 
-    async def get_by_email(self):
-        pass
+    async def get_by_email(self, user_email: EmailStr) -> Optional[schemas.UserDB]:
+        query = select(db.User).where(db.User.c.email == user_email)
+        result = await self.db_session.execute(query)
+        await self.db_session.flush()
+        return
 
     async def get_by_username(self):
         pass
