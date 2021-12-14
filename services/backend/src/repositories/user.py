@@ -2,7 +2,6 @@ import datetime
 from typing import Optional
 
 from pydantic import SecretStr
-from services.backend.src.db.models import User
 
 import src.db as db
 import src.schemas as schemas
@@ -12,15 +11,14 @@ from src.core.security import get_password_hash
 
 class UserRepository(BaseRepository):
     async def create(self, payload: schemas.UserCreate) -> Optional[int]:
-        query = User(
+        new_user = db.User(
             username=payload.username,
             email=payload.email,
             hashed_password=get_password_hash(payload.password),
             )
-        await self._db_session(query)
-        await self._db_session.commit()
-        self._db_session.refresh(query)
-
+        # self.db_session.add(new_user)
+        result = await self.db_session.execute(new_user)
+        await self.db_session.flush()
 
     async def get(self):
         pass
