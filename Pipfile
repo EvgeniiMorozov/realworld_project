@@ -9,6 +9,7 @@ uvicorn = "*"
 asyncpg = "*"
 aerich = "*"
 tortoise-orm = "*"
+pydantic = {extras = ["email"], version = "*"}
 
 [dev-packages]
 mypy = "*"
