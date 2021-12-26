@@ -1,4 +1,4 @@
-from tortoise import fields
+from tortoise import fields, models
 from database import BaseModel, TimestampMixin
 
 
@@ -6,15 +6,19 @@ class User(TimestampMixin, BaseModel):
     username = fields.CharField(max_length=80, unique=True, null=False)
     email = fields.CharField(max_length=100, unique=True, null=False)
     password_hash = fields.CharField(max_length=128, null=True)
-    bio = fields.CharField(max_length=300, null=True)
-    image = fields.CharField(max_length=120, null=True)
 
     class Meta:
         table = "users"
 
 
-class Profile(User):
-    follower = fields.ManyToManyField("modeles.Profile")
+class Profile(models.Model):
+    user = fields.OneToOneField("models.User")
+    bio = fields.CharField(max_length=300, null=True)
+    image = fields.CharField(max_length=120, null=True)
+    # follower = fields.ManyToManyField("modeles.Profile")
+
+    class Meta:
+        table = "profiles"
 
 
 # class Follow(BaseModel):
