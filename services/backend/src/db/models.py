@@ -12,18 +12,19 @@ class User(TimestampMixin, BaseModel):
 
 
 class Profile(models.Model):
-    user = fields.OneToOneField("models.User")
+    user: fields.OneToOneRelation[User] = fields.OneToOneField("models.User", related_name="profile")
     bio = fields.CharField(max_length=300, null=True)
     image = fields.CharField(max_length=120, null=True)
-    # follower = fields.ManyToManyField("modeles.Profile")
+    follows: fields.ManyToManyRelation["Profile"] = fields.ManyToManyField("models.Profile", related_name="followed_by")
+    favorites: fields.ManyToManyRelation["Profile"] = fields.ManyToManyField(
+        "models.Profile", related_name="favorited_by"
+    )
 
     class Meta:
         table = "profiles"
 
-
-# class Follow(BaseModel):
-#     user = fields.ForeignKeyField("models.Users", to_field="username")
-#     author = fields.ForeignKeyField("models.Users", to_field="username")
+    def __str__(self):
+        return self.user.username
 
 
 class Article(TimestampMixin, BaseModel):
