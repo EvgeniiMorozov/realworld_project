@@ -1,7 +1,9 @@
 from sqlalchemy import TIMESTAMP, Column, func
 from sqlalchemy.orm import declarative_base, declarative_mixin
+from sqlalchemy.orm.decl_api import DeclarativeMeta
 
-Base = declarative_base()
+class Base(metaclass=DeclarativeMeta):
+    __abstract__ = True
 
 
 @declarative_mixin
