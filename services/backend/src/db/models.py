@@ -1,18 +1,12 @@
+from typing import List, Optional, TYPE_CHECKING
+from sqlalchemy import Column, ForeignKey, Integer, String, Text
+from sqlalchemy.orm import backref, Mapped, relationship
 from sqlalchemy.sql.schema import Table
+
 from base import Base, TimestampMixin
-from sqlalchemy import (
-    TIMESTAMP,
-    Column,
-    ForeignKey,
-    Integer,
-    String,
-    Text,
-    func,
-)
-from sqlalchemy.orm import backref, relationship
 
 
-class User(Base):
+class User(TimestampMixin, Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
@@ -21,14 +15,12 @@ class User(Base):
     hashed_password = Column(String(128), nullable=True)
     bio = Column(String(300), nullable=True)
     image = Column(String(120), nullable=True)
-    created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=func.now())
-    updated_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=func.now())
     token = Column(String, unique=True)
-    articles = relationship("Article", cascade="all,delete-orphan", backref="authors")
-    comments = relationship("Comment", cascade="all,delete-orphan", backref="authors")
-    favorites = relationship("Favorite", cascade="all,delete-orphan", backref="users")
+    articles:Mapped[List["Article"]] = relationship("Article", cascade="all,delete-orphan", backref="authors")
+    comments: Mapped["Comment"] = relationship("Comment", cascade="all,delete-orphan", backref="authors")
+    favorites: Mapped["Favorite"] = relationship("Favorite", cascade="all,delete-orphan", backref="users")
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"User - username: {self.username}, email: {self.email}"
 
 
@@ -55,7 +47,7 @@ class Follow(Base):
         ),
     )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"Follow - user: {self.user}, author: {self.user}"
 
 
@@ -88,7 +80,7 @@ class Article(TimestampMixin, Base):
     favorite = relationship("Favorite", cascade="all,delete-orphan", backref="articles")
     comments = relationship("Comment", cascade="all,delete-orphan", backref="articles")
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"Article - slug: '{self.slug}', title: '{self.title}'"
 
 
@@ -99,7 +91,7 @@ class Favorite(Base):
     user = Column(String(80), ForeignKey("users.username", ondelete="CASCADE"))
     article = Column(String(100), ForeignKey("articles.slug", ondelete="CASCADE"))
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"Favorite - article: '{self.article}', user: {self.user}"
 
 
@@ -109,7 +101,7 @@ class Tag(Base):
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     name = Column(String(50), unique=True)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"Tag - id: {self.id}, name: '{self.name}'"
 
 
@@ -121,5 +113,5 @@ class Comment(TimestampMixin, Base):
     author = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"))
     article = Column(String(100), ForeignKey("articles.slug", ondelete="CASCADE"))
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"Comment - article: '{self.article}', author: {self.author}"
