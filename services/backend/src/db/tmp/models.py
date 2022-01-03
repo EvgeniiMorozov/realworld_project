@@ -16,7 +16,7 @@ class User(TimestampMixin, Base):
     bio = Column(String(300), nullable=True)
     image = Column(String(120), nullable=True)
     token = Column(String, unique=True)
-    articles:Mapped[List["Article"]] = relationship("Article", cascade="all,delete-orphan", backref="authors")
+    articles: Mapped[List["Article"]] = relationship("Article", cascade="all,delete-orphan", backref="authors")
     comments: Mapped["Comment"] = relationship("Comment", cascade="all,delete-orphan", backref="authors")
     favorites: Mapped["Favorite"] = relationship("Favorite", cascade="all,delete-orphan", backref="users")
 
