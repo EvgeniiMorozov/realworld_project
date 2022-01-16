@@ -1,8 +1,6 @@
-from sqlalchemy import Table, Column, ForeignKey, Integer, String, Text
+from sqlalchemy import Column, ForeignKey, Integer, String, Table, Text
 from sqlalchemy.orm import relationship
-
-from src.db import Base, TimestampMixin
-
+from base import Base, TimestampMixin
 
 article_tag_table = Table(
     "user_article",
