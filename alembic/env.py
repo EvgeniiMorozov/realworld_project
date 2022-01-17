@@ -34,7 +34,7 @@ target_metadata = db.metadata
 
 
 def get_url():
-    return settings.SQLALCHEMY_DATABASE_URI
+    return settings.alembic_database_url
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
