@@ -8,6 +8,7 @@ from base import Base, TimestampMixin
 
 class User(TimestampMixin, Base):
     __tablename__ = "users"
+    __mapper_args__ = {"eager_defaults": True}
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     username = Column(String(80), unique=True, nullable=False)
@@ -26,6 +27,7 @@ class User(TimestampMixin, Base):
 
 class Follow(Base):
     __tablename__ = "followers"
+    __mapper_args__ = {"eager_defaults": True}
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     user = Column(String(80), ForeignKey("users.username", ondelete="CASCADE"))
@@ -69,6 +71,7 @@ user_article_table = Table(
 
 class Article(TimestampMixin, Base):
     __tablename__ = "articles"
+    __mapper_args__ = {"eager_defaults": True}
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     slug = Column(String(100), unique=True, index=True)
@@ -86,6 +89,7 @@ class Article(TimestampMixin, Base):
 
 class Favorite(Base):
     __tablename__ = "favorites"
+    __mapper_args__ = {"eager_defaults": True}
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     user = Column(String(80), ForeignKey("users.username", ondelete="CASCADE"))
@@ -97,6 +101,7 @@ class Favorite(Base):
 
 class Tag(Base):
     __tablename__ = "tags"
+    __mapper_args__ = {"eager_defaults": True}
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     name = Column(String(50), unique=True)
@@ -107,6 +112,7 @@ class Tag(Base):
 
 class Comment(TimestampMixin, Base):
     __tablename__ = "comments"
+    __mapper_args__ = {"eager_defaults": True}
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     body = Column(Text)
