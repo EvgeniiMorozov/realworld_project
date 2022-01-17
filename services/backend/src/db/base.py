@@ -1,14 +1,20 @@
 from sqlalchemy import TIMESTAMP, Column, func
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import declarative_mixin, Mapped
+from sqlalchemy.orm import declarative_mixin, registry
 from sqlalchemy.orm.decl_api import DeclarativeMeta, declared_attr
 from sqlalchemy.sql.sqltypes import DateTime
 
 
-# class Base(metaclass=DeclarativeMeta):
-#     __abstract__ = True
+mapper_registry = registry()
 
-Base = declarative_base()
+class Base(metaclass=DeclarativeMeta):
+    __abstract__ = True
+    registry = mapper_registry
+    metadata = mapper_registry.metadata
+    __init__ = mapper_registry.constructor
+
+
+# Base = declarative_base()
 
 
 @declarative_mixin
