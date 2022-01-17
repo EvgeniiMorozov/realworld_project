@@ -1,9 +1,8 @@
-from typing import List, TYPE_CHECKING
-
-from sqlalchemy import Column, ForeignKey, Integer, String
-from sqlalchemy.orm import backref, Mapped, relationship
+from typing import TYPE_CHECKING, List
 
 from base import Base, TimestampMixin
+from sqlalchemy import Column, ForeignKey, Integer, String
+from sqlalchemy.orm import backref, relationship
 
 if TYPE_CHECKING:
     from .article import Article, Comment, Favorite
