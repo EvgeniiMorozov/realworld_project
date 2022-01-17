@@ -1,14 +1,26 @@
-from typing import AsyncIterator
+from typing import AsyncGenerator, Tuple
+
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.ext.asyncio.engine import AsyncEngine
 from sqlalchemy.orm import sessionmaker
-from src.core.config import settings
-
-engine = create_async_engine(settings.async_database_url, echo=True)
-async_session = sessionmaker(bind=engine, class_=AsyncSession, expire_on_commit=False)
+from starlette.requests import Request
 
 
-async def get_db() -> AsyncIterator[AsyncSession]:
+def create_engine(db_url: str) -> Tuple[AsyncEngine, AsyncSession]:
+    """Create async engine for application"""
+    async_engine = create_async_engine(db_url, future=True, echo=True)
+    async_session = sessionmaker(async_engine, expire_on_commit=False, class_=AsyncSession)
+    return async_engine, async_session
+
+
+async def get_db(request: Request) -> AsyncGenerator:
     """Dependency function that yields db sessions"""
-    async with async_session() as session:
-        yield session
-        await session.commit()
+    db = request.app.state.sessionmaker()
+    try:
+        yield db
+    except SQLAlchemyError as error:
+        await db.rollback()
+        raise error
+    finally:
+        await db.close()
