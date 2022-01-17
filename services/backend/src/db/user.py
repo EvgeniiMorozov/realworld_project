@@ -11,6 +11,7 @@ if TYPE_CHECKING:
 
 class User(TimestampMixin, Base):
     __tablename__ = "users"
+    __mapper_args__ = {"eager_defaults": True}
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     username = Column(String(80), unique=True, nullable=False)
@@ -29,6 +30,7 @@ class User(TimestampMixin, Base):
 
 class Follow(Base):
     __tablename__ = "followers"
+    __mapper_args__ = {"eager_defaults": True}
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     user = Column(String(80), ForeignKey("users.username", ondelete="CASCADE"))
