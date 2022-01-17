@@ -4,7 +4,6 @@ from sqlalchemy.orm import declarative_mixin, registry
 from sqlalchemy.orm.decl_api import DeclarativeMeta, declared_attr
 from sqlalchemy.sql.sqltypes import DateTime
 
-
 mapper_registry = registry()
 
 class Base(metaclass=DeclarativeMeta):
