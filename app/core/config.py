@@ -30,5 +30,21 @@ class Settings(BaseSettings):
             path=f"/{db_prefix}{values.get('POSTGRES_DB') or ''}"
         )
 
+    @property
+    def async_database_url(self) -> Optional[str]:
+        return (
+            self.SQLALCHEMY_DATABASE_URI.replace("postgresql://", "postgresql+asyncpg://")
+            if self.SQLALCHEMY_DATABASE_URI
+            else self.SQLALCHEMY_DATABASE_URI
+        )
+
+    @property
+    def alembic_database_url(self) -> Optional[str]:
+        return (
+            self.SQLALCHEMY_DATABASE_URI.replace("postgresql://", "postgresql+psycopg2-binary://")
+            if self.SQLALCHEMY_DATABASE_URI
+            else self.SQLALCHEMY_DATABASE_URI
+        )
+
 
 settings = Settings()
