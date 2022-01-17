@@ -1,9 +1,9 @@
-from typing import List, Optional, TYPE_CHECKING
-from sqlalchemy import Column, ForeignKey, Integer, String, Text
-from sqlalchemy.orm import backref, Mapped, relationship
-from sqlalchemy.sql.schema import Table
+from typing import TYPE_CHECKING, List, Optional
 
 from base import Base, TimestampMixin
+from sqlalchemy import Column, ForeignKey, Integer, String, Text
+from sqlalchemy.orm import Mapped, backref, relationship
+from sqlalchemy.sql.schema import Table
 
 
 class User(TimestampMixin, Base):
