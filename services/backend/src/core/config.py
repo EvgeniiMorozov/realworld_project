@@ -51,5 +51,13 @@ class Settings(BaseSettings):
             else self.DATABASE_URI
         )
 
+    @property
+    def alembic_database_url(self) -> Optional[str]:
+        return (
+            self.DATABASE_URI.replace("postgresql://", "postgresql+psycopg2-binary://")
+            if self.DATABASE_URI
+            else self.DATABASE_URI
+        )
+
 
 settings = Settings()
