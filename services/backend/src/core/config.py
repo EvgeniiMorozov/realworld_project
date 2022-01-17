@@ -2,8 +2,8 @@ import os
 import pathlib
 import secrets
 from typing import Any, Optional
-from dotenv import load_dotenv
 
+from dotenv import load_dotenv
 from pydantic import BaseSettings, validator
 from pydantic.networks import PostgresDsn
 
