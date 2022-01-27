@@ -10,6 +10,9 @@ class User(TimestampMixin, BaseModel):
     class Meta:
         table = "users"
 
+    def __str__(self) -> str:
+        return f"User: username: '{self.username}', email: {self.email}"
+
 
 class Profile(models.Model):
     user = fields.OneToOneField("models.User", related_name="profile")
@@ -26,7 +29,7 @@ class Profile(models.Model):
         table = "profiles"
 
     def __str__(self):
-        return self.user.username
+        return self.user
 
 
 class Article(TimestampMixin, BaseModel):
