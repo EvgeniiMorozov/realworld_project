@@ -8,7 +8,7 @@ class TimestampMixin:
 
 
 class BaseModel(Model):
-    id = IntField(pk=True, index=True, description="ID")
+    id = IntField(pk=True)
 
     class Meta:
         abstract = True
