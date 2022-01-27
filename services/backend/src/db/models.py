@@ -1,5 +1,5 @@
-from tortoise import fields, models
 from database import BaseModel, TimestampMixin
+from tortoise import fields, models
 
 
 class User(TimestampMixin, BaseModel):
@@ -12,10 +12,12 @@ class User(TimestampMixin, BaseModel):
 
 
 class Profile(models.Model):
-    user: fields.OneToOneRelation[User] = fields.OneToOneField("models.User", related_name="profile")
+    user = fields.OneToOneField("models.User", related_name="profile")
     bio = fields.CharField(max_length=300, null=True)
     image = fields.CharField(max_length=120, null=True)
-    follows: fields.ManyToManyRelation["Profile"] = fields.ManyToManyField("models.Profile", related_name="followed_by")
+    follows: fields.ManyToManyRelation["Profile"] = fields.ManyToManyField(
+        "models.Profile", related_name="followed_by"
+    )
     favorites: fields.ManyToManyRelation["Profile"] = fields.ManyToManyField(
         "models.Profile", related_name="favorited_by"
     )
@@ -51,7 +53,9 @@ class Tag(BaseModel):
 class Comment(TimestampMixin, BaseModel):
     body = fields.TextField()
     author = fields.ForeignKeyField("models.Users", related_name="comment")
-    article = fields.ForeignKeyField("models.Articles", related_name="comment", to_field="slug")
+    article = fields.ForeignKeyField(
+        "models.Articles", related_name="comment", to_field="slug"
+    )
 
     class Meta:
         table = "comments"
