@@ -14,6 +14,7 @@ load_dotenv(dotenv_path=dotenv_path)
 
 class Settings(BaseSettings):
     TESTING: bool = False
+    # ON_DEVELOPMENT: int = int(os.getenv("DEVELOPMENT"))
     SECRET_KEY: str = secrets.token_urlsafe(32)
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8
     POSTGRES_SERVER: Optional[str] = os.getenv("DB_HOST")
