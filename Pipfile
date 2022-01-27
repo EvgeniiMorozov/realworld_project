@@ -10,6 +10,7 @@ asyncpg = "*"
 aerich = "*"
 tortoise-orm = "*"
 pydantic = {extras = ["email"], version = "*"}
+python-dotenv = "*"
 
 [dev-packages]
 mypy = "*"
