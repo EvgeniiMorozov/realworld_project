@@ -24,6 +24,7 @@ class Profile(models.Model):
     favorites: fields.ManyToManyRelation["Profile"] = fields.ManyToManyField(
         "models.Profile", related_name="favorited_by"
     )
+    articles: fields.ReverseRelation["Article"]
 
     class Meta:
         table = "profiles"
@@ -37,7 +38,7 @@ class Article(TimestampMixin, BaseModel):
     title = fields.CharField(max_length=100)
     description = fields.CharField(max_length=300)
     body = fields.TextField()
-    author = fields.ForeignKeyField("models.Users", related_name="article")
+    author = fields.ForeignKeyField("models.Profile", related_name="articles")
 
     class Meta:
         table = "articles"
