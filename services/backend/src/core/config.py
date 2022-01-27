@@ -15,7 +15,7 @@ load_dotenv(dotenv_path=dotenv_path)
 class Settings(BaseSettings):
     TESTING: bool = False
     SECRET_KEY: str = secrets.token_urlsafe(32)
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60*24*8
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8
     POSTGRES_SERVER: Optional[str] = os.getenv("DB_HOST")
     POSTGRES_USER: Optional[str] = os.getenv("DB_USERNAME")
     POSTGRES_PASSWORD: Optional[str] = os.getenv("DB_PASSWORD")
@@ -29,7 +29,7 @@ class Settings(BaseSettings):
     @validator("DATABASE_URL", pre=True)
     def assemble_db_connection(
         cls, v: Optional[str], values: dict[str, Any]
-        ) -> Any:
+    ) -> Any:
         if isinstance(v, str):
             return v
 
@@ -39,5 +39,13 @@ class Settings(BaseSettings):
             user=values.get("POSTGRES_USER"),
             host=values.get("POSTGRES_HOST"),
             password=values.get("POSTGRES_PASSWORD"),
-            path=f"/{db_prefix}{values.get("POSTGRES_DB") or ''}",
+            path=f"/{db_prefix}{values.get('POSTGRES_DB') or ''}",
+        )
+
+    @property
+    def async_database_url(self) -> Optional[str]:
+        return (
+            self.DATABASE_URI.replace("postgresql://", "postgresql+asyncpg://")
+            if self.DATABASE_URI
+            else self.DATABASE_URI
         )
