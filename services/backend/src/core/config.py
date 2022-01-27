@@ -17,10 +17,10 @@ class Settings(BaseSettings):
     # ON_DEVELOPMENT: int = int(os.getenv("DEVELOPMENT"))
     SECRET_KEY: str = secrets.token_urlsafe(32)
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8
-    POSTGRES_SERVER: Optional[str] = os.getenv("DB_HOST")
-    POSTGRES_USER: Optional[str] = os.getenv("DB_USERNAME")
-    POSTGRES_PASSWORD: Optional[str] = os.getenv("DB_PASSWORD")
-    POSTGRES_DB: Optional[str] = os.getenv("DB_NAME")
+    DB_SERVER: Optional[str] = os.getenv("DB_HOST")
+    DB_USER: Optional[str] = os.getenv("DB_USERNAME")
+    DB_PASSWORD: Optional[str] = os.getenv("DB_PASSWORD")
+    DB_NAME: Optional[str] = os.getenv("DB_NAME")
     DATABASE_URI: Optional[PostgresDsn] = None
 
     class Config:
@@ -37,10 +37,10 @@ class Settings(BaseSettings):
         db_prefix = "test_" if values.get("TESTING") else ""
         return PostgresDsn.build(
             scheme="postgresql",
-            user=values.get("POSTGRES_USER"),
-            host=values.get("POSTGRES_HOST"),
-            password=values.get("POSTGRES_PASSWORD"),
-            path=f"/{db_prefix}{values.get('POSTGRES_DB') or ''}",
+            user=values.get("DB_USER"),
+            host=values.get("DB_SERVER"),
+            password=values.get("DB_PASSWORD"),
+            path=f"/{db_prefix}{values.get('DB_NAME') or ''}",
         )
 
     @property
