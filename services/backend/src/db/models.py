@@ -39,6 +39,8 @@ class Article(TimestampMixin, BaseModel):
     description = fields.CharField(max_length=300)
     body = fields.TextField()
     author = fields.ForeignKeyField("models.Profile", related_name="articles")
+    comments: fields.ReverseRelation["Comment"]
+    tags: fields.ReverseRelation["Tag"]
 
     class Meta:
         table = "articles"
@@ -58,7 +60,7 @@ class Comment(TimestampMixin, BaseModel):
     body = fields.TextField()
     author = fields.ForeignKeyField("models.Users", related_name="comment")
     article = fields.ForeignKeyField(
-        "models.Articles", related_name="comment", to_field="slug"
+        "models.Article", related_name="comments", to_field="slug"
     )
 
     class Meta:
