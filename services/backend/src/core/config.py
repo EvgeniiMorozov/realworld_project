@@ -49,3 +49,6 @@ class Settings(BaseSettings):
             if self.DATABASE_URI
             else self.DATABASE_URI
         )
+
+
+settings = Settings()

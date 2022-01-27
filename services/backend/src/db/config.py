@@ -1,8 +1,8 @@
-from core.config import DATABASE_URL
+from src.core.config import settings
 
 
 TORTOISE_ORM = {
-    "connections": {"default": DATABASE_URL},
+    "connections": {"default": settings.async_database_url},
     "apps": {
         "models": {
             "models": ["db", "aerich.models"],
