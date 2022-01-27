@@ -8,7 +8,7 @@ from pydantic import BaseSettings, validator
 from pydantic.networks import PostgresDsn
 
 current_path = pathlib.Path.cwd().absolute()
-dotenv_path = current_path.parent.parent / ".dev.env"
+dotenv_path = current_path.parent.parent / ".env"
 load_dotenv(dotenv_path=dotenv_path)
 
 
