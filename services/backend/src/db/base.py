@@ -6,6 +6,7 @@ from sqlalchemy.sql.sqltypes import DateTime
 
 mapper_registry = registry()
 
+
 class Base(metaclass=DeclarativeMeta):
     __abstract__ = True
     registry = mapper_registry
@@ -22,8 +23,12 @@ class TimestampMixin:
     # updated_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=func.now())
     @declared_attr
     def created_at(cls) -> Column[DateTime]:
-        return Column(TIMESTAMP(timezone=True),nullable=False,  server_default=func.now())
+        return Column(
+            TIMESTAMP(timezone=True), nullable=False, server_default=func.now()
+        )
 
     @declared_attr
     def updated_at(cls) -> Column[DateTime]:
-        return Column(TIMESTAMP(timezone=True),nullable=False,  server_default=func.now())
+        return Column(
+            TIMESTAMP(timezone=True), nullable=False, server_default=func.now()
+        )
