@@ -18,7 +18,8 @@ class Settings(BaseSettings):
     SECRET_KEY: str = secrets.token_urlsafe(32)
     # 60 minutes * 24 hours * 8 days = 8 days
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8
-    POSTGRES_SERVER: Optional[str] = os.getenv("DB_HOST")
+    POSTGRES_HOST: Optional[str] = os.getenv("DB_HOST")
+    DB_PORT: Optional[str] = os.getenv("DB_PORT")
     POSTGRES_USER: Optional[str] = os.getenv("DB_USERNAME")
     POSTGRES_PASSWORD: Optional[str] = os.getenv("DB_PASSWORD")
     POSTGRES_DB: Optional[str] = os.getenv("DB_NAME")
@@ -29,32 +30,36 @@ class Settings(BaseSettings):
         env_file_encoding = "utf-8"
 
     @validator("DATABASE_URI", pre=True)
-    def assemble_db_connection(cls, v: Optional[str], values: dict[str, Any]) -> Any:
+    def assemble_db_connection(
+        cls, v: Optional[str], values: dict[str, Any]
+    ) -> Any:
         if isinstance(v, str):
             return v
 
         db_prefix = "test_" if values.get("TESTING") else ""
         return PostgresDsn.build(
-            scheme="postgresql",
+            scheme="postgresql+asyncpg",
             user=values.get("POSTGRES_USER"),
             password=values.get("POSTGRES_PASSWORD"),
-            host=values.get("POSTGRES_SERVER"),
-            # port="5432",
+            host=values.get("POSTGRES_HOST"),
+            port=int(values.get("DB_PORT")) or 5432,
             path=f"/{db_prefix}{values.get('POSTGRES_DB') or ''}",
         )
 
-    @property
-    def async_database_url(self) -> Optional[str]:
-        return (
-            self.DATABASE_URI.replace("postgresql://", "postgresql+asyncpg://")
-            if self.DATABASE_URI
-            else self.DATABASE_URI
-        )
+    # @property
+    # def async_database_url(self) -> Optional[str]:
+    #     return (
+    #         self.DATABASE_URI.replace("postgresql://", "postgresql+asyncpg://")
+    #         if self.DATABASE_URI
+    #         else self.DATABASE_URI
+    #     )
 
     @property
     def alembic_database_url(self) -> Optional[str]:
         return (
-            self.DATABASE_URI.replace("postgresql://", "postgresql+psycopg2-binary://")
+            self.DATABASE_URI.replace(
+                "postgresql+asyncpg://", "postgresql+psycopg2://"
+            )
             if self.DATABASE_URI
             else self.DATABASE_URI
         )
