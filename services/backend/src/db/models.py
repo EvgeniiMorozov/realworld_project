@@ -8,16 +8,22 @@ class User(TimestampMixin, Base):
     __tablename__ = "users"
     __mapper_args__ = {"eager_defaults": True}
 
-    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     username = Column(String(80), unique=True, nullable=False)
     email = Column(String(100), unique=True, nullable=False)
     hashed_password = Column(String(128), nullable=True)
     bio = Column(String(300), nullable=True)
     image = Column(String(120), nullable=True)
     token = Column(String, unique=True)
-    articles = relationship("Article", cascade="all,delete-orphan", backref="authors")
-    comments = relationship("Comment", cascade="all,delete-orphan", backref="authors")
-    favorites = relationship("Favorite", cascade="all,delete-orphan", backref="users")
+    articles = relationship(
+        "Article", cascade="all,delete-orphan", backref="authors"
+    )
+    comments = relationship(
+        "Comment", cascade="all,delete-orphan", backref="authors"
+    )
+    favorites = relationship(
+        "Favorite", cascade="all,delete-orphan", backref="users"
+    )
 
     def __repr__(self) -> str:
         return f"User - username: {self.username}, email: {self.email}"
@@ -27,9 +33,11 @@ class Follow(Base):
     __tablename__ = "followers"
     __mapper_args__ = {"eager_defaults": True}
 
-    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     user = Column(String(80), ForeignKey("users.username", ondelete="CASCADE"))
-    author = Column(String(80), ForeignKey("users.username", ondelete="CASCADE"))
+    author = Column(
+        String(80), ForeignKey("users.username", ondelete="CASCADE")
+    )
     followers = relationship(
         "User",
         foreign_keys=[user],
@@ -71,15 +79,19 @@ class Article(TimestampMixin, Base):
     __tablename__ = "articles"
     __mapper_args__ = {"eager_defaults": True}
 
-    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     slug = Column(String(100), unique=True, index=True)
     title = Column(String(150), nullable=False)
     description = Column(String(300))
     body = Column(Text)
     author = Column(String(80))
     tag = relationship("Tag", secondary="article_tag", backref="articles")
-    favorite = relationship("Favorite", cascade="all,delete-orphan", backref="articles")
-    comments = relationship("Comment", cascade="all,delete-orphan", backref="articles")
+    favorite = relationship(
+        "Favorite", cascade="all,delete-orphan", backref="articles"
+    )
+    comments = relationship(
+        "Comment", cascade="all,delete-orphan", backref="articles"
+    )
 
     def __repr__(self) -> str:
         return f"Article - slug: '{self.slug}', title: '{self.title}'"
@@ -89,9 +101,11 @@ class Favorite(Base):
     __tablename__ = "favorites"
     __mapper_args__ = {"eager_defaults": True}
 
-    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     user = Column(String(80), ForeignKey("users.username", ondelete="CASCADE"))
-    article = Column(String(100), ForeignKey("articles.slug", ondelete="CASCADE"))
+    article = Column(
+        String(100), ForeignKey("articles.slug", ondelete="CASCADE")
+    )
 
     def __repr__(self) -> str:
         return f"Favorite - article: '{self.article}', user: {self.user}"
@@ -101,7 +115,7 @@ class Tag(Base):
     __tablename__ = "tags"
     __mapper_args__ = {"eager_defaults": True}
 
-    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(50), unique=True)
 
     def __repr__(self) -> str:
@@ -112,10 +126,12 @@ class Comment(TimestampMixin, Base):
     __tablename__ = "comments"
     __mapper_args__ = {"eager_defaults": True}
 
-    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     body = Column(Text)
     author = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"))
-    article = Column(String(100), ForeignKey("articles.slug", ondelete="CASCADE"))
+    article = Column(
+        String(100), ForeignKey("articles.slug", ondelete="CASCADE")
+    )
 
     def __repr__(self) -> str:
         return f"Comment - article: '{self.article}', author: {self.author}"
