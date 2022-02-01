@@ -1,5 +1,3 @@
-import pathlib
-
 from fastapi import FastAPI
 from uvicorn import run
 
@@ -9,8 +7,8 @@ from endpoints.routers import api_router
 # from loguru import logger
 
 
-CURR_PATH = pathlib.Path()
-TO_ALEMBIC_INI = CURR_PATH.parent
+# CURR_PATH = pathlib.Path()
+# TO_ALEMBIC_INI = CURR_PATH.parent
 
 
 app = FastAPI()
