@@ -13,5 +13,5 @@ RUN pipenv install --deploy
 
 EXPOSE 8000
 
-#CMD alembic upgrade head && python ./app/main.py
-CMD python ./src/main.py
+CMD alembic upgrade head && python app/main.py
+#CMD python main.py
