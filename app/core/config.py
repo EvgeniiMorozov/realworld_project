@@ -22,7 +22,7 @@ class Settings(BaseSettings):
 
         db_prefix = "test_" if values.get("TESTING") else ""
         return PostgresDsn.build(
-            scheme="postgresql",
+            scheme="postgresql+asyncpg",
             user=values.get("POSTGRES_USER"),
             password=values.get("POSTGRES_PASSWORD"),
             host=values.get("POSTGRES_SERVER"),
@@ -31,17 +31,11 @@ class Settings(BaseSettings):
         )
 
     @property
-    def async_database_url(self) -> Optional[str]:
-        return (
-            self.SQLALCHEMY_DATABASE_URI.replace("postgresql://", "postgresql+asyncpg://")
-            if self.SQLALCHEMY_DATABASE_URI
-            else self.SQLALCHEMY_DATABASE_URI
-        )
-
-    @property
     def alembic_database_url(self) -> Optional[str]:
         return (
-            self.SQLALCHEMY_DATABASE_URI.replace("postgresql://", "postgresql+psycopg2-binary://")
+            self.SQLALCHEMY_DATABASE_URI.replace(
+                "postgresql+asyncpg://", "postgresql+psycopg2://"
+            )
             if self.SQLALCHEMY_DATABASE_URI
             else self.SQLALCHEMY_DATABASE_URI
         )
