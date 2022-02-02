@@ -34,4 +34,4 @@ async def shutdown():
 
 
 if __name__ == "__main__":
-    run("main:app", port=8000, host="127.0.0.1", reload=False)
+    run("main:app", port=8080, host="127.0.0.1", reload=False)
