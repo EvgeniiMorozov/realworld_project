@@ -16,13 +16,19 @@ class User(TimestampMixin, Base):
     image = Column(String(120), nullable=True)
     token = Column(String, unique=True)
     articles = relationship(
-        "Article", cascade="all,delete-orphan", backref="authors"
+        "Article",
+        cascade="all,delete-orphan",
+        backref="authors",
     )
     comments = relationship(
-        "Comment", cascade="all,delete-orphan", backref="authors"
+        "Comment",
+        cascade="all,delete-orphan",
+        backref="authors",
     )
     favorites = relationship(
-        "Favorite", cascade="all,delete-orphan", backref="users"
+        "Favorite",
+        cascade="all,delete-orphan",
+        backref="users",
     )
 
     def __repr__(self) -> str:
@@ -87,10 +93,14 @@ class Article(TimestampMixin, Base):
     author = Column(String(80))
     tag = relationship("Tag", secondary="article_tag", backref="articles")
     favorite = relationship(
-        "Favorite", cascade="all,delete-orphan", backref="articles"
+        "Favorite",
+        cascade="all,delete-orphan",
+        backref="articles",
     )
     comments = relationship(
-        "Comment", cascade="all,delete-orphan", backref="articles"
+        "Comment",
+        cascade="all,delete-orphan",
+        backref="articles",
     )
 
     def __repr__(self) -> str:
