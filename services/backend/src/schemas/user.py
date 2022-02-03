@@ -18,7 +18,7 @@ class UserDB(UserBase):
 class UserCreate(UserBase):
     email: EmailStr = Field(..., example="example@example.com")
     username: str = Field(..., example="perry")
-    password: SecretStr = Field(..., example="change_it")
+    password: str = Field(..., example="change_it")
 
 
 class UserWithToken(UserBase):
