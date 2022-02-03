@@ -2,9 +2,9 @@ FROM python:3.9-buster
 
 WORKDIR /app
 
-COPY alembic alembic/
-COPY app app/
-COPY alembic.ini ./
+COPY alembic app/alembic/
+COPY app app/app
+COPY alembic.ini ./app
 COPY Pipfile ./
 COPY Pipfile.lock ./
 
@@ -13,5 +13,5 @@ RUN pipenv install --deploy
 
 EXPOSE 8000
 
-CMD alembic upgrade head && python app/main.py
-#CMD python main.py
+#CMD alembic upgrade head && python app/main.py
+CMD python app/main.py
