@@ -10,7 +10,9 @@ from starlette.requests import Request
 def create_engine(db_url: str) -> Tuple[AsyncEngine, AsyncSession]:
     """Create async engine for application"""
     async_engine = create_async_engine(db_url, future=True, echo=True)
-    async_session = sessionmaker(async_engine, expire_on_commit=False, class_=AsyncSession)
+    async_session = sessionmaker(
+        async_engine, expire_on_commit=False, class_=AsyncSession
+    )
     return async_engine, async_session
 
 
