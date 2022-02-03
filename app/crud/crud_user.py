@@ -2,9 +2,9 @@ from typing import Optional
 
 from pydantic import SecretStr
 
-import db
 import schemas
 from core.security import get_password_hash, verify_password
+from db import models as db
 from db.base import database
 
 

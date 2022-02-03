@@ -1,7 +1,7 @@
 from typing import Optional
 
-import db
 import schemas
+from db import models as db
 from db.base import database
 
 

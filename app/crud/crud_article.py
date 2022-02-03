@@ -4,9 +4,9 @@ from typing import Optional
 from slugify import slugify
 from sqlalchemy import desc, func, select
 
-import db
 import schemas
 from crud import crud_tag, crud_user
+from db import models as db
 from db.base import database
 
 
