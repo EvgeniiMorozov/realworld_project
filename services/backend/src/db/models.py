@@ -11,7 +11,7 @@ class User(TimestampMixin, Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     username = Column(String(80), unique=True, nullable=False)
     email = Column(String(100), unique=True, nullable=False)
-    hashed_password = Column(String(128), nullable=True)
+    password_hash = Column(String(128), nullable=True)
     bio = Column(String(300), nullable=True)
     image = Column(String(120), nullable=True)
     token = Column(String, unique=True)
