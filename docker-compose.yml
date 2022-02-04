@@ -4,7 +4,7 @@ services:
   app:
     build: .
     ports:
-      - 80:80
+      - "8000:8000"
     environment:
       - POSTGRES_SERVER=db
     healthcheck:
@@ -46,6 +46,15 @@ services:
       - "5050:80"
     depends_on:
       - db
+  nginx:
+    image: nginx:stable-alpine
+    container_name: realworld-nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf.prod:/etc/nginx/conf.d/nginx.conf
+    depends_on:
+      - app
 
 volumes:
   app-db-data:
