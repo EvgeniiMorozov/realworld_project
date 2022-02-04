@@ -1,4 +1,14 @@
-from db.base import *
-from db.models import *
-
-metadata.create_all(bind=engine)
+from base import (  # noqa
+    database,
+    engine,
+    metadata
+)
+from models import (  # noqa
+    articles,
+    comments,
+    favoriter_assoc,
+    followers_assoc,
+    tags,
+    tags_assoc,
+    users
+)
