@@ -1,14 +1,7 @@
 import secrets
-from typing import (
-    Any,
-    Optional
-)
+from typing import Any, Optional
 
-from pydantic import (
-    BaseSettings,
-    PostgresDsn,
-    validator
-)
+from pydantic import BaseSettings, PostgresDsn, validator
 
 
 class Settings(BaseSettings):
@@ -36,7 +29,6 @@ class Settings(BaseSettings):
             # port="5432",
             path=f"/{db_prefix}{values.get('POSTGRES_DB') or ''}",
         )
-
 
 
 settings = Settings()
