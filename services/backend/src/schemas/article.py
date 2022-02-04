@@ -1,52 +1,95 @@
-import datetime
+from datetime import datetime
 from typing import Optional
 
+from models.users import ProfileUser
 from pydantic import BaseModel
-from src import schemas
 
 
-class ArticleBase(BaseModel):
+class Article(BaseModel):
+    slug: str
     title: str
     description: str
     body: str
+    tagList: Optional[list[str]] = []
+    createdAt: datetime
+    updatedAt: datetime
+    favorited: Optional[bool] = False
+    favoritesCount: Optional[int] = 0
+    author: ProfileUser
+
+    class Config:
+        orm_mode = True
 
 
-class ArticleDB(ArticleBase):
+class GetArticles(BaseModel):
+    articles: list[Article]
+    articlesCount: Optional[int] = 0
+
+    class Config:
+        orm_mode = True
+
+
+class CreateArticle(BaseModel):
+    title: str
+    description: str
+    body: str
+    tagList: Optional[list[str]] = None
+
+
+class CreateArticleRequest(BaseModel):
+    article: CreateArticle
+
+
+class CreateArticleResponce(BaseModel):
+    article: Article
+
+
+class GetArticle(BaseModel):
+    article: Article
+
+    class Config:
+        orm_mode = True
+
+
+class ChangeArticle(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    body: Optional[str] = None
+
+
+class UpdateArticle(BaseModel):
+    article: ChangeArticle
+
+
+class Comment(BaseModel):
     id: int
-    slug: str
-    author_id: str
-    created_at: datetime.datetime
-    updated_at: datetime.datetime
-
-
-class ArticleInCreate(BaseModel):
-    title: str
-    description: str
+    createdAt: datetime
+    updatedAt: datetime
     body: str
-    tagList: Optional[list[str]]
+    author: ProfileUser
+
+    class Config:
+        orm_mode = True
 
 
-class ArticleForResponse(ArticleBase):
-    slug: str
-    author: schemas.Profile
-    createdAt: datetime.datetime
-    updatedAt: datetime.datetime
-    tagList: Optional[list[str]]
-    favorited: bool
-    favoritesCount: int
+class GetCommentsResponce(BaseModel):
+    comments: list[Comment]
 
 
-class ArticleInResponse(BaseModel):
-    article: ArticleForResponse
+class CreateCommentBody(BaseModel):
+    body: str
 
 
-class ArticleInUpdate(BaseModel):
-    title: Optional[str]
-    description: Optional[str]
-    body: Optional[str]
-    tagList: Optional[list[str]]
+class CreateComment(BaseModel):
+    comment: CreateCommentBody
 
 
-class MultipleArticlesInResponse(BaseModel):
-    articles: list[ArticleForResponse]
-    articlesCount: int
+class GetCommentResponce(BaseModel):
+    comment: Comment
+
+
+class GetTags(BaseModel):
+    tags: list[str]
+
+    class Config:
+        orm_mode = True
