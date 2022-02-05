@@ -1,8 +1,7 @@
 import datetime
 
-from pydantic import BaseModel
-
 import schemas
+from pydantic import BaseModel
 
 
 class CommentBase(BaseModel):

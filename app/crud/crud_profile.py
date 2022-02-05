@@ -3,6 +3,7 @@ from typing import Optional
 import db
 import schemas
 from crud import crud_user
+
 # from db import models as db
 # from db.base import database
 
@@ -13,7 +14,9 @@ async def get_profile_by_username(
     user_db = await crud_user.get_user_by_username(username=username)
     if user_db is None:
         return None
-    profile = schemas.Profile(username=user_db.username, bio=user_db.bio, image=user_db.image)
+    profile = schemas.Profile(
+        username=user_db.username, bio=user_db.bio, image=user_db.image
+    )
     profile.following = await is_following(user_db, requested_user)
     return profile
 
@@ -24,12 +27,16 @@ async def get_profile_by_user_id(
     user_db = await crud_user.get(user_id=user_id)
     if user_db is None:
         return None
-    profile = schemas.Profile(username=user_db.username, bio=user_db.bio, image=user_db.image)
+    profile = schemas.Profile(
+        username=user_db.username, bio=user_db.bio, image=user_db.image
+    )
     profile.following = await is_following(user_db, requested_user)
     return profile
 
 
-async def is_following(follower: schemas.UserDB, follower_by: Optional[schemas.UserDB]) -> bool:
+async def is_following(
+    follower: schemas.UserDB, follower_by: Optional[schemas.UserDB]
+) -> bool:
     if follower_by is None:
         return False
     query = (

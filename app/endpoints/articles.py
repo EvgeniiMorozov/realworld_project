@@ -1,9 +1,8 @@
-from fastapi import APIRouter, Body, Depends, HTTPException
-from starlette.status import HTTP_400_BAD_REQUEST, HTTP_403_FORBIDDEN
-
 import schemas
 from crud import crud_article, crud_profile
 from endpoints import utils
+from fastapi import APIRouter, Body, Depends, HTTPException
+from starlette.status import HTTP_400_BAD_REQUEST, HTTP_403_FORBIDDEN
 
 SLUG_NOT_FOUND = "article with this slug not found"
 AUTHOR_NOT_EXISTED = "This article's author not existed"
@@ -34,15 +33,21 @@ def gen_article_in_response(
     )
 
 
-async def get_article_response_by_slug(slug: str, current_user: schemas.UserDB) -> schemas.ArticleInResponse:
+async def get_article_response_by_slug(
+    slug: str, current_user: schemas.UserDB
+) -> schemas.ArticleInResponse:
     article = await crud_article.get_article_by_slug(slug=slug)
     if article is None:
         raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail=SLUG_NOT_FOUND)
 
-    profile = await crud_profile.get_profile_by_user_id(article.author_id, requested_user=current_user)
+    profile = await crud_profile.get_profile_by_user_id(
+        article.author_id, requested_user=current_user
+    )
     tags = await crud_article.get_article_tags(article.id)
     if current_user:
-        favorited = await crud_article.is_article_favorited_by_user(article.id, current_user.id)
+        favorited = await crud_article.is_article_favorited_by_user(
+            article.id, current_user.id
+        )
     else:
         favorited = False
     favorites_count = await crud_article.count_article_favorites(article.id)
@@ -67,9 +72,13 @@ async def create_article(
 ) -> schemas.ArticleInResponse:
     article_id = await crud_article.create(article_in, author_id=current_user.id)
     article = await crud_article.get(article_id)
-    profile = await crud_profile.get_profile_by_user_id(article.author_id, requested_user=current_user)
+    profile = await crud_profile.get_profile_by_user_id(
+        article.author_id, requested_user=current_user
+    )
     tags = await crud_article.get_article_tags(article_id)
-    favorited = await crud_article.is_article_favorited_by_user(article_id, current_user.id)
+    favorited = await crud_article.is_article_favorited_by_user(
+        article_id, current_user.id
+    )
     favorites_count = await crud_article.count_article_favorites(article_id)
 
     return gen_article_in_response(
@@ -92,12 +101,18 @@ async def feed_articles(
     limit: int = 20,
     offset: int = 0,
 ) -> schemas.MultipleArticlesInResponse:
-    article_dbs = await crud_article.feed(limit=limit, offset=offset, follow_by=current_user.id)
+    article_dbs = await crud_article.feed(
+        limit=limit, offset=offset, follow_by=current_user.id
+    )
     articles = []
     for article_db in article_dbs:
-        profile = await crud_profile.get_profile_by_user_id(article_db.author_id, requested_user=current_user)
+        profile = await crud_profile.get_profile_by_user_id(
+            article_db.author_id, requested_user=current_user
+        )
         tags = await crud_article.get_article_tags(article_db.id)
-        favorited = await crud_article.is_article_favorited_by_user(article_db.id, current_user.id)
+        favorited = await crud_article.is_article_favorited_by_user(
+            article_db.id, current_user.id
+        )
         favorites_count = await crud_article.count_article_favorites(article_db.id)
         article_for_response = schemas.ArticleForResponse(
             slug=article_db.slug,
@@ -112,7 +127,9 @@ async def feed_articles(
             favoritesCount=favorites_count,
         )
         articles.append(article_for_response)
-    return schemas.MultipleArticlesInResponse(articles=articles, articlesCount=len(articles))
+    return schemas.MultipleArticlesInResponse(
+        articles=articles, articlesCount=len(articles)
+    )
 
 
 @router.get(
@@ -161,7 +178,10 @@ async def delete_article(
         raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail=SLUG_NOT_FOUND)
 
     if article_db.author_id != current_user.id:
-        raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="cannot delete an article owner by other user")
+        raise HTTPException(
+            status_code=HTTP_403_FORBIDDEN,
+            detail="cannot delete an article owner by other user",
+        )
 
     await crud_article.delete(article_db)
 
@@ -180,13 +200,19 @@ async def list_articles(
     author: str = None,
     favorited: str = None,
 ) -> schemas.MultipleArticlesInResponse:
-    article_dbs = await crud_article.get_all(limit=limit, offset=offset, tag=tag, author=author, favorited=favorited)
+    article_dbs = await crud_article.get_all(
+        limit=limit, offset=offset, tag=tag, author=author, favorited=favorited
+    )
     articles = []
     for article_db in article_dbs:
-        profile = await crud_profile.get_profile_by_user_id(article_db.author_id, requested_user=current_user)
+        profile = await crud_profile.get_profile_by_user_id(
+            article_db.author_id, requested_user=current_user
+        )
         tags = await crud_article.get_article_tags(article_db.id)
         if current_user:
-            is_favorited = await crud_article.is_article_favorited_by_user(article_db.id, current_user.id)
+            is_favorited = await crud_article.is_article_favorited_by_user(
+                article_db.id, current_user.id
+            )
         else:
             is_favorited = False
         favorites_count = await crud_article.count_article_favorites(article_db.id)
@@ -204,7 +230,9 @@ async def list_articles(
         )
         articles.append(article_for_response)
 
-    return schemas.MultipleArticlesInResponse(articles=articles, articlesCount=len(articles))
+    return schemas.MultipleArticlesInResponse(
+        articles=articles, articlesCount=len(articles)
+    )
 
 
 @router.post(

@@ -1,25 +1,31 @@
 from typing import Callable, Optional
 
+import schemas
+from core import security
+from crud import crud_user
 from fastapi import Depends, HTTPException
 from fastapi.security import APIKeyHeader
 from starlette import status
 
-import schemas
-from core import security
-from crud import crud_user
-
-
 JWT_TOKEN_PREFIX = "Token"
 
 
-def authorization_header_token_required(api_key: str = Depends(APIKeyHeader(name="Authorization"))) -> str:
+def authorization_header_token_required(
+    api_key: str = Depends(APIKeyHeader(name="Authorization")),
+) -> str:
     try:
         token_prefix, token = api_key.split(" ")
     except ValueError:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="unsupported authorization type")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="unsupported authorization type",
+        )
 
     if token_prefix != JWT_TOKEN_PREFIX:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="unsupported authorization type")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="unsupported authorization type",
+        )
     return token
 
 
@@ -38,7 +44,11 @@ def authorization_header_token_optional(
 
 
 def authorization_header_token(required: bool = True) -> Callable:
-    return authorization_header_token_required if required else authorization_header_token_optional
+    return (
+        authorization_header_token_required
+        if required
+        else authorization_header_token_optional
+    )
 
 
 async def get_current_user_required(

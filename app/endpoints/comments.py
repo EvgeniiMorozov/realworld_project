@@ -1,9 +1,8 @@
-from fastapi import APIRouter, Body, Depends, HTTPException
-from starlette.status import HTTP_400_BAD_REQUEST, HTTP_403_FORBIDDEN
-
 import schemas
 from crud import crud_article, crud_comment, crud_profile
 from endpoints.utils import get_current_user
+from fastapi import APIRouter, Body, Depends, HTTPException
+from starlette.status import HTTP_400_BAD_REQUEST, HTTP_403_FORBIDDEN
 
 SLUG_NOT_FOUND = "article with this slug not found"
 
@@ -25,9 +24,13 @@ async def create_article_comment(
     if article_db is None:
         raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail=SLUG_NOT_FOUND)
 
-    comment_id = await crud_comment.create(payload=comment_in, article_id=article_db.id, author_id=current_user.id)
+    comment_id = await crud_comment.create(
+        payload=comment_in, article_id=article_db.id, author_id=current_user.id
+    )
     comment_db = await crud_comment.get(comment_id)
-    profile = await crud_profile.get_profile_by_user_id(comment_db.author_id, requested_user=current_user)
+    profile = await crud_profile.get_profile_by_user_id(
+        comment_db.author_id, requested_user=current_user
+    )
 
     return schemas.CommentInResponse(
         comment=schemas.CommentForResponse(
@@ -54,10 +57,14 @@ async def get_comments_from_an_article(
     if article_db is None:
         raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail=SLUG_NOT_FOUND)
 
-    comment_dbs = await crud_comment.get_comments_from_an_article(article_id=article_db.id)
+    comment_dbs = await crud_comment.get_comments_from_an_article(
+        article_id=article_db.id
+    )
     comments = []
     for comment_db in comment_dbs:
-        profile = await crud_profile.get_profile_by_user_id(comment_db.author_id, requested_user=current_user)
+        profile = await crud_profile.get_profile_by_user_id(
+            comment_db.author_id, requested_user=current_user
+        )
         comments.append(
             schemas.CommentForResponse(
                 id=comment_db.id,
@@ -86,13 +93,19 @@ async def delete_comment_for_article(
 
     comment_db = await crud_comment.get(comment_id)
     if comment_db is None:
-        raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail="comment with this id not found")
+        raise HTTPException(
+            status_code=HTTP_400_BAD_REQUEST, detail="comment with this id not found"
+        )
 
     if comment_db.article_id != article_db.id:
-        raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail="this comment is not belong to this article")
+        raise HTTPException(
+            status_code=HTTP_400_BAD_REQUEST,
+            detail="this comment is not belong to this article",
+        )
 
     if comment_db.author_id != current_user.id:
         raise HTTPException(
-            status_code=HTTP_403_FORBIDDEN, detail="You can not delete a comment ids not belong to yourself"
+            status_code=HTTP_403_FORBIDDEN,
+            detail="You can not delete a comment ids not belong to yourself",
         )
     await crud_comment.delete(comment_id)

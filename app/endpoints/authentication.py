@@ -1,9 +1,8 @@
-from fastapi import APIRouter, Body, HTTPException
-from starlette.status import HTTP_400_BAD_REQUEST
-
 import schemas
 from core import security
 from crud import crud_user
+from fastapi import APIRouter, Body, HTTPException
+from starlette.status import HTTP_400_BAD_REQUEST
 
 router = APIRouter()
 
@@ -14,7 +13,9 @@ router = APIRouter()
     description="Register a new user",
     response_model=schemas.UserResponse,
 )
-async def register(user_in: schemas.UserCreate = Body(..., embed=True, alias="user")) -> schemas.UserResponse:
+async def register(
+    user_in: schemas.UserCreate = Body(..., embed=True, alias="user")
+) -> schemas.UserResponse:
     user_db = await crud_user.get_user_by_email(email=user_in.email)
     if user_db:
         raise HTTPException(
@@ -41,11 +42,17 @@ async def register(user_in: schemas.UserCreate = Body(..., embed=True, alias="us
     response_model=schemas.UserResponse,
 )
 async def login(
-    user_login: schemas.LoginUser = Body(..., embed=True, alias="user", name="Credentials to use"),
+    user_login: schemas.LoginUser = Body(
+        ..., embed=True, alias="user", name="Credentials to use"
+    ),
 ) -> schemas.UserResponse:
-    user = await crud_user.authenticate(email=user_login.email, password=user_login.password)
+    user = await crud_user.authenticate(
+        email=user_login.email, password=user_login.password
+    )
     if not user:
-        raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail="Incorrect email or password")
+        raise HTTPException(
+            status_code=HTTP_400_BAD_REQUEST, detail="Incorrect email or password"
+        )
     token = security.create_access_token(user.id)
     return schemas.UserResponse(
         user=schemas.UserWithToken(

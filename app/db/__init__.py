@@ -1,8 +1,4 @@
-from .base import (  # noqa
-    database,
-    engine,
-    metadata
-)
+from .base import database, engine, metadata  # noqa
 from .models import (  # noqa
     articles,
     comments,
@@ -10,5 +6,5 @@ from .models import (  # noqa
     followers_assoc,
     tags,
     tags_assoc,
-    users
+    users,
 )

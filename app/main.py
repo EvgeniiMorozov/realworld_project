@@ -1,11 +1,9 @@
 from os import getenv as os_getenv
 
-from fastapi import FastAPI
-from uvicorn import run
-
 from db import database
 from endpoints.routers import api_router
-
+from fastapi import FastAPI
+from uvicorn import run
 
 app = FastAPI()
 

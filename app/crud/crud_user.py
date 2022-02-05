@@ -1,10 +1,10 @@
 from typing import Optional
 
-from pydantic import SecretStr
-
 import db
 import schemas
 from core.security import get_password_hash, verify_password
+from pydantic import SecretStr
+
 # from db import models as db
 # from db.base import database
 
@@ -38,7 +38,12 @@ async def get_user_by_username(username: str) -> Optional[schemas.UserDB]:
 
 async def update(user_id: int, payload: schemas.UserUpdate) -> int:
     update_data = payload.dict(exclude_unset=True)
-    query = db.users.update().where(user_id == db.users.c.id).values(update_data).returning(db.users.c.id)
+    query = (
+        db.users.update()
+        .where(user_id == db.users.c.id)
+        .values(update_data)
+        .returning(db.users.c.id)
+    )
     return await db.database.execute(query=query)
 
 

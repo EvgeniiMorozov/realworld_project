@@ -2,11 +2,14 @@ from typing import Optional
 
 import db
 import schemas
+
 # from db import models as db
 # from db.base import database
 
 
-async def create(payload: schemas.CommentInCreate, article_id: int, author_id: int) -> int:
+async def create(
+    payload: schemas.CommentInCreate, article_id: int, author_id: int
+) -> int:
     query = db.comments.insert().values(
         body=payload.body,
         author_id=author_id,
