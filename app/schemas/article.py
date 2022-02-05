@@ -3,7 +3,7 @@ from typing import Optional
 
 from pydantic import BaseModel
 
-from schemas.profile import Profile
+from .profile import Profile
 
 
 class ArticleBase(BaseModel):

@@ -1,9 +1,9 @@
-from base import (  # noqa
+from .base import (  # noqa
     database,
     engine,
     metadata
 )
-from models import (  # noqa
+from .models import (  # noqa
     articles,
     comments,
     favoriter_assoc,
