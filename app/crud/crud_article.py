@@ -4,10 +4,11 @@ from typing import Optional
 from slugify import slugify
 from sqlalchemy import desc, func, select
 
+import db
 import schemas
 from crud import crud_tag, crud_user
-from db import models as db
-from db.base import database
+# from db import models as db
+# from db.base import database
 
 
 async def add_article_tags(article_id: int, tags: list[str]) -> None:
@@ -17,7 +18,7 @@ async def add_article_tags(article_id: int, tags: list[str]) -> None:
                 await crud_tag.create(tag)
         values = [{"article_id": article_id, "tag": tag} for tag in tags]
         query = db.tags_assoc.insert().values(values)
-        await database.execute(query=query)
+        await db.database.execute(query=query)
 
 
 async def remove_article_tags(article_id: int, tags: list[str]) -> None:
@@ -25,14 +26,14 @@ async def remove_article_tags(article_id: int, tags: list[str]) -> None:
         query = (
             db.tags_assoc.delete().where(db.tags_assoc.c.article_id == article_id).where(db.tags_assoc.c.tag.in_(tags))
         )
-        await database.execute(query=query)
+        await db.database.execute(query=query)
 
 
 async def get_article_tags(article_id: int) -> list[str]:
     query = (
         db.tags_assoc.select().with_only_columns([db.tags_assoc.c.tag]).where(article_id == db.tags_assoc.c.article_id)
     )
-    tags = await database.fetch_all(query=query)
+    tags = await db.database.fetch_all(query=query)
     return [tag.get("tag") for tag in tags]
 
 
@@ -45,7 +46,7 @@ async def create(payload: schemas.ArticleInCreate, author_id: int) -> int:
         slug=slug,
         author_id=author_id,
     )
-    article_id = await database.execute(query=query)
+    article_id = await db.database.execute(query=query)
     if payload.tagList:
         for tag in payload.tagList:
             if not await crud_tag.is_existing_tag(tag):
@@ -56,14 +57,14 @@ async def create(payload: schemas.ArticleInCreate, author_id: int) -> int:
 
 async def get(article_id: int) -> Optional[schemas.ArticleDB]:
     query = db.articles.select().where(article_id == db.articles.c.id)
-    article_row = await database.fetch_one(query=query)
+    article_row = await db.database.fetch_one(query=query)
 
     return schemas.ArticleDB(**article_row) if article_row else None
 
 
 async def get_article_by_slug(slug: str) -> Optional[schemas.ArticleDB]:
     query = db.articles.select().where(slug == db.articles.c.slug)
-    article_row = await database.fetch_one(query=query)
+    article_row = await db.database.fetch_one(query=query)
 
     return schemas.ArticleDB(**article_row) if article_row else None
 
@@ -74,13 +75,13 @@ async def is_article_favorited_by_user(article_id: int, user_id: int) -> bool:
         .where(article_id == db.favoriter_assoc.c.article_id)
         .where(user_id == db.favoriter_assoc.c.user_id)
     )
-    row = await database.fetch_one(query=query)
+    row = await db.database.fetch_one(query=query)
     return row is not None
 
 
 async def count_article_favorites(article_id: int) -> int:
     query = select([func.count()]).select_from(db.favoriter_assoc).where(db.favoriter_assoc.c.article_id == article_id)
-    row = await database.fetch_one(query=query)
+    row = await db.database.fetch_one(query=query)
     return dict(**row).get("count_1", 0)
 
 
@@ -92,7 +93,7 @@ async def update(article_db: schemas.ArticleDB, payload: schemas.ArticleInUpdate
     query = (
         db.articles.update().where(article_db.id == db.articles.c.id).values(update_data).returning(db.articles.c.id)
     )
-    await database.execute(query=query)
+    await db.database.execute(query=query)
     if new_tags is not None:
         add_tags = list(set(new_tags) - set(old_tags))
         remove_tags = list(set(old_tags) - set(new_tags))
@@ -102,7 +103,7 @@ async def update(article_db: schemas.ArticleDB, payload: schemas.ArticleInUpdate
 
 async def delete(article_db: schemas.ArticleDB) -> None:
     query = db.articles.delete().where(article_db.id == db.articles.c.id)
-    await database.execute(query=query)
+    await db.database.execute(query=query)
 
 
 async def get_all(
@@ -129,7 +130,7 @@ async def get_all(
             query = query.where(favorited_id == db.favoriter_assoc.c.user_id)
     if need_join:
         query = query.select_from(j)
-    articles = await database.fetch_all(query=query)
+    articles = await db.database.fetch_all(query=query)
     return [schemas.ArticleDB(**article) for article in articles]
 
 
@@ -137,13 +138,13 @@ async def feed(follow_by: int, limit: int = 20, offset: int = 0) -> list[schemas
     query = select([db.articles]).limit(limit).offset(offset).order_by(desc(db.articles.c.created_at))
     j = db.articles.join(db.followers_assoc, db.articles.c.author_id == db.followers_assoc.c.follower)
     query = query.where(db.followers_assoc.c.followed_by == follow_by).select_from(j)
-    articles = await database.fetch_all(query=query)
+    articles = await db.database.fetch_all(query=query)
     return [schemas.ArticleDB(**article) for article in articles]
 
 
 async def favorite(article_id: int, user_id: int) -> None:
     query = db.favoriter_assoc.insert().values(user_id=user_id, article_id=article_id)
-    await database.execute(query=query)
+    await db.database.execute(query=query)
 
 
 async def unfavorite(article_id: int, user_id: int) -> None:
@@ -152,4 +153,4 @@ async def unfavorite(article_id: int, user_id: int) -> None:
         .where(user_id == db.favoriter_assoc.c.user_id)
         .where(article_id == db.favoriter_assoc.c.article_id)
     )
-    await database.execute(query=query)
+    await db.database.execute(query=query)

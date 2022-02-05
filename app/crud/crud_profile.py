@@ -1,9 +1,10 @@
 from typing import Optional
 
+import db
 import schemas
 from crud import crud_user
-from db import models as db
-from db.base import database
+# from db import models as db
+# from db.base import database
 
 
 async def get_profile_by_username(
@@ -36,7 +37,7 @@ async def is_following(follower: schemas.UserDB, follower_by: Optional[schemas.U
         .where(follower.id == db.followers_assoc.c.follower)
         .where(follower_by.id == db.followers_assoc.c.followed_by)
     )
-    row = await database.fetch_one(query=query)
+    row = await db.database.fetch_one(query=query)
     return row is not None
 
 
@@ -48,7 +49,7 @@ async def follow(follower: schemas.UserDB, follower_by: schemas.UserDB) -> bool:
         .values(follower=follower.id, follower_by=follower_by.id)
         .returning(db.followers_assoc.c.follower)
     )
-    row = await database.fetch_one(query=query)
+    row = await db.database.fetch_one(query=query)
     return row is not None
 
 
@@ -60,5 +61,5 @@ async def unfollow(follower: schemas.UserDB, follower_by: schemas.UserDB) -> boo
         .where(db.followers_assoc.c.follower == follower.id)
         .where(db.followers_assoc.c.followed_by == follower_by.id)
     )
-    row = await database.fetch_one(query=query)
+    row = await db.database.fetch_one(query=query)
     return row is not None
