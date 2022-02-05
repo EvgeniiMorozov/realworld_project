@@ -24,6 +24,7 @@ black = "==22.1.0"
 flake8 = "*"
 isort = "*"
 sqlalchemy2-stubs = "==0.0.2.a19"
+pre-commit = "*"
 
 [requires]
 python_version = "3.9"
