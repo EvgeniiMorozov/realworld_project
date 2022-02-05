@@ -3,12 +3,14 @@ repos:
     rev: 22.1.0
     hooks:
      - id: black
+       exclude: ^alembic/
 
   - repo: https://github.com/pycqa/isort
     rev: 5.10.1
     hooks:
       - id: isort
         name: isort (python)
+        exclude: ^alembic/
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v2.5.0
