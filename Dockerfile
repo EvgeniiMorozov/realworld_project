@@ -1,19 +1,22 @@
 FROM python:3.9.10
 
-# WORKDIR /usr/src
+WORKDIR /usr/src/api
 
-COPY ./alembic /app/alembic/
-COPY ./app /app/app
-COPY ./alembic.ini /app/
-COPY ./Pipfile /app/
-COPY ./Pipfile.lock /app/
+COPY ./alembic/ ./alembic/
+COPY ./app ./app
+COPY ./alembic.ini .
+#COPY Pipfile ./
+#COPY Pipfile.lock ./
+COPY ./requirements.txt .
 
-WORKDIR /app/
+# WORKDIR /app/
 
-RUN pip install pipenv
-RUN pipenv install --deploy
+#RUN pip install pipenv
+#RUN pipenv install --deploy
+RUN pip install -r ./requirements.txt
 
 #EXPOSE 8000
 
-CMD alembic upgrade head && pipenv run app/main.py
+#CMD pipenv run alembic upgrade head && pipenv run app/main.py
 #CMD pipenv run python ./app/main.py
+CMD ["python", "app/main.py"]

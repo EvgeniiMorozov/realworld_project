@@ -3,6 +3,18 @@ server {
 
     server_name 94.228.123.204;
     location / {
-        proxy_pass http://frontend:3000
+        proxy_pass http://frontend:3000;
+    }
+
+    location /api {
+        proxy_pass http://api:3001;
+    }
+
+    location /pgadmin {
+        proxy_pass http://pgadmin:5050;
+    }
+
+    location /docs {
+        proxy_pass http://api:3001/docs;
     }
 }
