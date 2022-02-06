@@ -1,5 +1,5 @@
 from database import BaseModel, TimestampMixin
-from tortoise import fields, models
+from tortoise import fields
 
 
 class User(TimestampMixin, BaseModel):
@@ -14,7 +14,7 @@ class User(TimestampMixin, BaseModel):
         return f"User: username: '{self.username}', email: {self.email}"
 
 
-class Profile(models.Model):
+class Profile(BaseModel):
     user = fields.OneToOneField("models.User", related_name="profile")
     bio = fields.CharField(max_length=300, null=True)
     image = fields.CharField(max_length=120, null=True)
