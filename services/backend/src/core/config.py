@@ -16,11 +16,12 @@ class Settings(BaseSettings):
     TESTING: bool = False
     # ON_DEVELOPMENT: int = int(os.getenv("DEVELOPMENT"))
     SECRET_KEY: str = secrets.token_urlsafe(32)
+    AUTH_ALGORITHM: Optional[str] = os.getenv("AUTH_ALGORITHM")
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8
     DB_SERVER: Optional[str] = os.getenv("DB_HOST")
     DB_USER: Optional[str] = os.getenv("DB_USERNAME")
     DB_PASSWORD: Optional[str] = os.getenv("DB_PASSWORD")
-    DB_NAME: Optional[str] = os.getenv("DB_NAME")
+    DB_NAME: Optional[str] = os.getenv("DB_BASENAME")
     DATABASE_URI: Optional[PostgresDsn] = None
 
     class Config:
