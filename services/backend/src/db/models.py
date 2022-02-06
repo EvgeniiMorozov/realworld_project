@@ -29,8 +29,8 @@ class Profile(BaseModel):
     class Meta:
         table = "profiles"
 
-    def __str__(self):
-        return self.user
+    def __str__(self) -> str:
+        return f"{self.user}"
 
 
 class Article(TimestampMixin, BaseModel):
