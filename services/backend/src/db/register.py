@@ -8,7 +8,6 @@ def register_tortoise(
     config: Optional[dict] = None,
     generate_schemas: bool = False,
 ) -> None:
-
     @app.on_event("startup")
     async def init_orm():
         await Tortoise.init(config=config)

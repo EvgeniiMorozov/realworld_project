@@ -1,10 +1,8 @@
+from db.config import TORTOISE_ORM
+from db.register import register_tortoise
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from uvicorn import run
-
-from db.config import TORTOISE_ORM
-from db.register import register_tortoise
-
 
 app = FastAPI()
 
