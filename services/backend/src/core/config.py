@@ -36,19 +36,11 @@ class Settings(BaseSettings):
 
         db_prefix = "test_" if values.get("TESTING") else ""
         return PostgresDsn.build(
-            scheme="postgresql",
+            scheme="postgresql+asyncpg",
             user=values.get("DB_USER"),
             host=values.get("DB_SERVER"),
             password=values.get("DB_PASSWORD"),
             path=f"/{db_prefix}{values.get('DB_NAME') or ''}",
-        )
-
-    @property
-    def async_database_url(self) -> Optional[str]:
-        return (
-            self.DATABASE_URI.replace("postgresql://", "postgresql+asyncpg://")
-            if self.DATABASE_URI
-            else self.DATABASE_URI
         )
 
 
