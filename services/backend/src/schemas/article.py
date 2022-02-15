@@ -1,8 +1,8 @@
 from datetime import datetime
 from typing import Optional
 
-from models.users import ProfileUser
 from pydantic import BaseModel
+from src.schemas.users import ProfileUser
 
 
 class Article(BaseModel):
@@ -72,7 +72,7 @@ class Comment(BaseModel):
         orm_mode = True
 
 
-class GetCommentsResponce(BaseModel):
+class GetCommentsResponse(BaseModel):
     comments: list[Comment]
 
 
@@ -84,7 +84,7 @@ class CreateComment(BaseModel):
     comment: CreateCommentBody
 
 
-class GetCommentResponce(BaseModel):
+class GetCommentResponse(BaseModel):
     comment: Comment
 
 

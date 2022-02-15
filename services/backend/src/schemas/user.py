@@ -70,5 +70,5 @@ class ProfileUser(BaseModel):
         orm_mode = True
 
 
-class ProfileUserResponce(BaseModel):
+class ProfileUserResponse(BaseModel):
     profile: ProfileUser
