@@ -10,6 +10,13 @@ repos:
     hooks:
       - id: isort
         name: isort (python)
+        args: ['--profile black']
+        exclude: ^alembic/
+
+  - repo: https://github.com/myint/autoflake
+    rev: v1.4
+    hooks:
+      - id: autoflake
         exclude: ^alembic/
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
