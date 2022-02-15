@@ -1,5 +1,5 @@
-from db.base import init_db
 from fastapi import FastAPI
+from src.db.base import init_db
 from uvicorn import run
 
 app = FastAPI()
