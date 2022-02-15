@@ -30,7 +30,7 @@ class User(LoginUser):
         orm_mode = True
 
 
-class UserInResponce(BaseModel):
+class UserInResponse(BaseModel):
     email: EmailStr
     token: str
     username: str
@@ -41,8 +41,8 @@ class UserInResponce(BaseModel):
         orm_mode = True
 
 
-class UserResponce(BaseModel):
-    user: UserInResponce
+class UserResponse(BaseModel):
+    user: UserInResponse
 
 
 class UpdateUser(BaseModel):

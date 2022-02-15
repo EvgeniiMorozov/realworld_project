@@ -1,28 +1,32 @@
 from typing import Optional
 
-from fastapi import APIRouter, HTTPException, Request, Response
-from fastapi.params import Depends
-from slugify.slugify import slugify
-from sqlalchemy.ext.asyncio import AsyncSession
-from starlette.status import HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND, HTTP_200_OK
-
-from core import auth
-from core import utils
+from core import auth, utils
 from crud import articles as articles_crud
 from crud import users as users_crud
 from db.base import get_session
 from db.users import User
 from endpoints.helpers import check_article_status_and_return_if_positive
+from fastapi import APIRouter, HTTPException, Request, Response
+from fastapi.params import Depends
 from models.articles import (
-    GetArticles,
-    CreateArticleResponce,
     CreateArticleRequest,
-    GetArticle,
-    UpdateArticle,
-    GetCommentsResponce,
+    CreateArticleResponce,
     CreateComment,
+    GetArticle,
+    GetArticles,
     GetCommentResponce,
+    GetCommentsResponce,
     GetTags,
+    UpdateArticle,
+)
+from slugify.slugify import slugify
+from sqlalchemy.ext.asyncio import AsyncSession
+from starlette.status import (
+    HTTP_200_OK,
+    HTTP_201_CREATED,
+    HTTP_400_BAD_REQUEST,
+    HTTP_403_FORBIDDEN,
+    HTTP_404_NOT_FOUND,
 )
 
 articles_router = APIRouter()
@@ -62,13 +66,19 @@ def get_articles(
     if authorization:
         token = auth.clear_token(authorization)
         auth_user = users_crud.get_current_user_by_token(db, token)
-        articles = articles_crud.get_articles_auth_or_not(db, tag, author, favorited, limit, offset, auth_user)
+        articles = articles_crud.get_articles_auth_or_not(
+            db, tag, author, favorited, limit, offset, auth_user
+        )
     else:
-        articles = articles_crud.get_articles_auth_or_not(db, tag, author, favorited, limit, offset)
+        articles = articles_crud.get_articles_auth_or_not(
+            db, tag, author, favorited, limit, offset
+        )
     return GetArticles(articles=articles, articlesCount=len(articles))
 
 
-@articles_router.post("/articles", response_model=CreateArticleResponce, status_code=HTTP_201_CREATED)
+@articles_router.post(
+    "/articles", response_model=CreateArticleResponce, status_code=HTTP_201_CREATED
+)
 def set_up_article(
     article_data: CreateArticleRequest,
     db: AsyncSession,
@@ -107,13 +117,18 @@ async def change_article(
     check = await articles_crud.get_single_article_auth_or_not_auth(db, slug)
 
     if check.author.username != user.username:
-        raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="You are not the author of this article")
+        raise HTTPException(
+            status_code=HTTP_403_FORBIDDEN,
+            detail="You are not the author of this article",
+        )
 
     article = await articles_crud.change_article(db, slug, article_data, user)
     return GetArticle(article=article)
 
 
-@articles_router.delete("/articles/{slug}", response_description="OK", tags=["Articles"])
+@articles_router.delete(
+    "/articles/{slug}", response_description="OK", tags=["Articles"]
+)
 async def remove_article(
     slug: str,
     db: AsyncSession = Depends(get_session),
@@ -132,7 +147,9 @@ async def remove_article(
 
 
 @articles_router.get("/articles/{slug}/comments", response_model=GetCommentsResponce)
-async def select_comment(request: Request, slug: str, db: AsyncSession = Depends(get_session)) -> GetCommentsResponce:
+async def select_comment(
+    request: Request, slug: str, db: AsyncSession = Depends(get_session)
+) -> GetCommentsResponce:
     """Get the comments for an article. Auth is optional."""
     await check_article_status_and_return_if_positive(db, slug)
 
@@ -147,7 +164,9 @@ async def select_comment(request: Request, slug: str, db: AsyncSession = Depends
     return GetCommentsResponce(comments=comments)
 
 
-@articles_router.post("/articles/{slug}/comments", response_model=GetCommentResponce, tags=["Comments"])
+@articles_router.post(
+    "/articles/{slug}/comments", response_model=GetCommentResponce, tags=["Comments"]
+)
 async def post_comment(
     slug: str,
     comment: CreateComment,
@@ -161,7 +180,9 @@ async def post_comment(
     return GetCommentResponce(comment=comment)
 
 
-@articles_router.delete("/articles/{slug}/comments/{id}", response_description="OK", tags=["Comments"])
+@articles_router.delete(
+    "/articles/{slug}/comments/{id}", response_description="OK", tags=["Comments"]
+)
 async def remove_comment(
     slug: str,
     comment_id: int,
@@ -172,7 +193,10 @@ async def remove_comment(
     article = await check_article_status_and_return_if_positive(db, slug, user)
 
     if article.author != user:
-        raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="You can only delete your own article.")
+        raise HTTPException(
+            status_code=HTTP_403_FORBIDDEN,
+            detail="You can only delete your own article.",
+        )
 
     comment = await articles_crud.get_comment(db, slug, comment_id)
     if not comment:
@@ -182,7 +206,11 @@ async def remove_comment(
     return Response(status_code=HTTP_200_OK)
 
 
-@articles_router.post("/articles/{slug}/favorite", response_model=CreateArticleResponce, tags=["Favorites"])
+@articles_router.post(
+    "/articles/{slug}/favorite",
+    response_model=CreateArticleResponce,
+    tags=["Favorites"],
+)
 async def post_favorite(
     slug: str,
     db: AsyncSession = Depends(get_session),
@@ -194,14 +222,19 @@ async def post_favorite(
     favorite = utils.check_favorite(db, slug, user.username)
     if favorite:
         raise HTTPException(
-            status_code=HTTP_400_BAD_REQUEST, detail="You have already added this article to your favorites"
+            status_code=HTTP_400_BAD_REQUEST,
+            detail="You have already added this article to your favorites",
         )
     await articles_crud.create_favorite(db, slug, user)
     article.favorited = True
     return CreateArticleResponce(article=article)
 
 
-@articles_router.delete("/articles/{slug}/favorite", response_model=CreateArticleResponce, tags=["Favorites"])
+@articles_router.delete(
+    "/articles/{slug}/favorite",
+    response_model=CreateArticleResponce,
+    tags=["Favorites"],
+)
 async def remove_favorite(
     slug: str,
     db: AsyncSession = Depends(get_session),
@@ -212,7 +245,8 @@ async def remove_favorite(
     favorite = utils.check_favorite(db, slug, user.username)
     if not favorite:
         raise HTTPException(
-            status_code=HTTP_400_BAD_REQUEST, detail="You have already added this article to your favorites"
+            status_code=HTTP_400_BAD_REQUEST,
+            detail="You have already added this article to your favorites",
         )
 
     articles_crud.delete_favorite(db, slug, user)

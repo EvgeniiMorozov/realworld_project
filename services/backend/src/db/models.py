@@ -41,9 +41,7 @@ class Follow(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     user = Column(String(80), ForeignKey("users.username", ondelete="CASCADE"))
-    author = Column(
-        String(80), ForeignKey("users.username", ondelete="CASCADE")
-    )
+    author = Column(String(80), ForeignKey("users.username", ondelete="CASCADE"))
     followers = relationship(
         "User",
         foreign_keys=[user],
@@ -113,9 +111,7 @@ class Favorite(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     user = Column(String(80), ForeignKey("users.username", ondelete="CASCADE"))
-    article = Column(
-        String(100), ForeignKey("articles.slug", ondelete="CASCADE")
-    )
+    article = Column(String(100), ForeignKey("articles.slug", ondelete="CASCADE"))
 
     def __repr__(self) -> str:
         return f"Favorite - article: '{self.article}', user: {self.user}"
@@ -139,9 +135,7 @@ class Comment(TimestampMixin, Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     body = Column(Text)
     author = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"))
-    article = Column(
-        String(100), ForeignKey("articles.slug", ondelete="CASCADE")
-    )
+    article = Column(String(100), ForeignKey("articles.slug", ondelete="CASCADE"))
 
     def __repr__(self) -> str:
         return f"Comment - article: '{self.article}', author: {self.author}"

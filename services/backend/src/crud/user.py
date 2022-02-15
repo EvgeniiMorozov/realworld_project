@@ -37,9 +37,7 @@ async def get_user_by_id(db: AsyncSession, user_id: int) -> db_User:
 
 async def get_user_by_username(db: AsyncSession, username: str) -> db_User:
     """Get user by username"""
-    user = await db.execute(
-        select(db_User).filter(db_User.username == username)
-    )
+    user = await db.execute(select(db_User).filter(db_User.username == username))
     return user.scalars().first()
 
 
@@ -49,9 +47,7 @@ async def get_user_by_email(db: AsyncSession, email: str) -> db_User:
     return user.scalars().first()
 
 
-async def create_user(
-    db: AsyncSession, payload: user_schema.NewUserRequest
-) -> db_User:
+async def create_user(db: AsyncSession, payload: user_schema.NewUserRequest) -> db_User:
     """Create and return a created user"""
     new_user = db_User(
         username=payload.user.username,
@@ -66,7 +62,7 @@ async def create_user(
 
 async def change_user(
     db: AsyncSession,
-    current_user: user_schema.UserResponce,
+    current_user: user_schema.UserResponse,
     payload: user_schema.UpdateUserRequest,
 ) -> user_schema.ProfileUser:
     """Update and return user"""
