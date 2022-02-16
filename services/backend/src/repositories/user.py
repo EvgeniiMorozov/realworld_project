@@ -26,11 +26,14 @@ class UserRepository(BaseRepository):
         await self.db_session.flush()
         return schemas.UserDB(**result.scalars().first()) if result else None
 
-    async def get_by_email(self, user_email: EmailStr) -> Optional[schemas.UserDB]:
-        query = select(db.User).where(db.User.c.email == user_email)
+    async def get_by_email(
+        self,
+        user_email: EmailStr,
+    ) -> Optional[schemas.UserDB]:
+        query = select(db.User).where(db.User.email == user_email)
         result = await self.db_session.execute(query)
         await self.db_session.flush()
-        return
+        return result.scalars().first()
 
     async def get_by_username(self):
         pass
