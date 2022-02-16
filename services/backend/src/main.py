@@ -1,17 +1,11 @@
 from fastapi import FastAPI
-from src.db.base import init_db
 from uvicorn import run
 
 app = FastAPI()
 
 
-@app.on_event("startup")
-async def on_startup():
-    await init_db()
-
-
 @app.get("/")
-async def index():
+async def index() -> dict:
     return {"message": "Test message"}
 
 
