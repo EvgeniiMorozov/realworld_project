@@ -31,7 +31,9 @@ class Settings(BaseSettings):
         env_file_encoding = "utf-8"
 
     @validator("DATABASE_URI", pre=True)
-    def assemble_db_connection(cls, v: Optional[str], values: dict[str, Any]) -> Any:
+    def assemble_db_connection(
+        cls, v: Optional[str], values: dict[str, Any]
+    ) -> Any:
         if isinstance(v, str):
             return v
 
@@ -45,18 +47,12 @@ class Settings(BaseSettings):
             path=f"/{db_prefix}{values.get('POSTGRES_DB') or ''}",
         )
 
-    # @property
-    # def async_database_url(self) -> Optional[str]:
-    #     return (
-    #         self.DATABASE_URI.replace("postgresql://", "postgresql+asyncpg://")
-    #         if self.DATABASE_URI
-    #         else self.DATABASE_URI
-    #     )
-
     @property
     def alembic_database_url(self) -> Optional[str]:
         return (
-            self.DATABASE_URI.replace("postgresql+asyncpg://", "postgresql+psycopg2://")
+            self.DATABASE_URI.replace(
+                "postgresql+asyncpg://", "postgresql+psycopg2://"
+            )
             if self.DATABASE_URI
             else self.DATABASE_URI
         )
